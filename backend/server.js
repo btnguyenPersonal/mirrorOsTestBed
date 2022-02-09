@@ -20,6 +20,9 @@ app.get("/", (req, res) => {
     res.json({ message: "Basic app." });
 });
 require("./app/routes/user.routes")(app);
+require("./app/routes/event_type.routes")(app);
+require("./app/routes/event.routes")(app);
+require("./app/routes/api.routes")(app);
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
