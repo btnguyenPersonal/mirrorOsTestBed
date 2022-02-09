@@ -1,13 +1,13 @@
 module.exports = (sequelize, Sequelize) => {
-    const User = sequelize.define("user", {
-        user_id: {
+    const EventType = sequelize.define("event_type", {
+        event_type_id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
-        email: {
+        event_type: {
             type: Sequelize.STRING
         }
     });
-    return User;
+    return EventType;
 };    
