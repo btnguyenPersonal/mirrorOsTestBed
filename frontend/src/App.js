@@ -5,7 +5,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <p>
-          Login Page
+          re-acclimating to GitLab stuff
         </p>
       </header>
     </div>
