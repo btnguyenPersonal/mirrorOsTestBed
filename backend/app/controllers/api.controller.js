@@ -23,7 +23,7 @@ exports.login = (req, res) => {
         }
         Event.create(event)
         .then(data => {
-            res.status(400).send({
+            res.status(200).send({
                 message: "Success."
             });
         })

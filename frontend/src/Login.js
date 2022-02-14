@@ -18,27 +18,18 @@ export default function Login() {
 
   function sendCredentials(email,password)
   {
-    // var data = {
-    //     email: email,
-    //     password: password
-    // };
-    // console.log(JSON.stringify(data));
     const login = { email, password};
     fetch("http://localhost:8080/api/login", {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(login)
-    }).then(() => {
-      console.log("New user added")
+    }).then((data) => {
+      if(data.status==200){ 
+        console.log("Success");
+      }else{
+        console.log("Failure");
+      }
     })
-    // var xhr = new XMLHttpRequest();
-    // var url = "http://localhost:8080/api/login";
-    // xhr.open("POST",url,true);
-    // xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-    // xhr.send(JSON.stringify(data));
-    // xhr.onloadend = function () {
-    //     // done
-    // };
   }
 
   return (
