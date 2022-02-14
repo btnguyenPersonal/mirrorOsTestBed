@@ -1,9 +1,24 @@
 const db = require("../models");
 const Event = db.event;
+//const { spawn } = require("child_process");
+const exec = require('await-exec')
+
 
 const password = "password";
 
-exports.restart = (req, res) => {
+
+async function restartPort(portId) {
+    //console.log("portId: " + portId);
+    return await exec(`./reboot.sh ${portId}`).then((r) => {
+        if(r.stderr) {
+            return false;
+        } else {
+            return true;
+        }
+    });
+}
+
+exports.restart = async (req, res) => {
     const id = req.params.id;
     if (id < 1 || id > 7) {
         res.status(400).send({
@@ -11,8 +26,7 @@ exports.restart = (req, res) => {
         });
         return;
     }
-
-    if(restartPort(id)) {
+    if(await restartPort(id)) {
         res.status(400).send({
             message: "Success."
         });
@@ -21,11 +35,6 @@ exports.restart = (req, res) => {
             message: "Failed."
         });
     }
-}
-
-function restartPort(portId) {
-    console.log("portId: " + portId);
-    return true;
 }
 
 exports.login = (req, res) => {
