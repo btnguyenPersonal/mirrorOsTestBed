@@ -3,6 +3,31 @@ const Event = db.event;
 
 const password = "password";
 
+exports.restart = (req, res) => {
+    const id = req.params.id;
+    if (id < 1 || id > 7) {
+        res.status(400).send({
+            message: "id must be between 1-7 inclusive."
+        });
+        return;
+    }
+
+    if(restartPort(id)) {
+        res.status(400).send({
+            message: "Success."
+        });
+    } else {
+        res.status(400).send({
+            message: "Failed."
+        });
+    }
+}
+
+function restartPort(portId) {
+    console.log("portId: " + portId);
+    return true;
+}
+
 exports.login = (req, res) => {
     if (!req.body.email) {
         res.status(400).send({
