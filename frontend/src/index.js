@@ -7,10 +7,9 @@ import { TerminalContextProvider } from "react-terminal";
 
 ReactDOM.render(
   <React.StrictMode>
-  <TerminalContextProvider>
+    <TerminalContextProvider>
     <App />
-    </TerminalContextProvider>,
-      rootElement
+    </TerminalContextProvider>
     <Login />
   </React.StrictMode>,
   document.getElementById('root')
