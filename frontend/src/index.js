@@ -2,15 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import Login from './Login';
 import { TerminalContextProvider } from "react-terminal";
 
 ReactDOM.render(
-  <React.StrictMode>
-    <TerminalContextProvider>
+  <TerminalContextProvider>
     <App />
-    </TerminalContextProvider>
-    <Login />
-  </React.StrictMode>,
+  </TerminalContextProvider>,
   document.getElementById('root')
 );

@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-//import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
-export default function Login() {
+function Login({ setPage }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -27,27 +26,31 @@ export default function Login() {
     }).then((data) => {
       if(data.status===200){ 
         console.log("Success");
+        setPage("Terminal");
       }else{
         console.log("Failure");
       }
     })
   }
 
-  return (
+  let content = (
     <div className="Login">
+      <h1>OS Test Bed</h1>
       <Form onSubmit={handleSubmit}>
+        <Form.Label className="input_field_label">Email: </Form.Label>
         <Form.Group size="lg" controlId="email">
-          <Form.Label>Email: </Form.Label>
           <Form.Control
             autoFocus
+            className="input_field"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </Form.Group>
+        <Form.Label className="input_field_label">Password: </Form.Label>
         <Form.Group size="lg" controlId="password">
-          <Form.Label>Password: </Form.Label>
           <Form.Control
+            className="input_field"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -57,6 +60,11 @@ export default function Login() {
           Login
         </Button>
       </Form>
+      <Button onClick={() => setPage("Terminal")}>Next Page Only here until login request works</Button>
     </div>
   );
+
+  return content;
 }
+
+export default Login;
