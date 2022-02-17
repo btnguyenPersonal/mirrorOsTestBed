@@ -1,7 +1,12 @@
 import './App.css';
-import { ReactTerminal } from "react-terminal";
+import './Terminal.css';
+import Terminal from './Terminal'
+import Login from './Login';
+import React, { useState } from 'react';
 
 function App() {
+  const [page, setPage] = useState("Login");
+
   const commands = {
     user: "BrandonB",
     command1: "this is command 1",
@@ -9,18 +14,11 @@ function App() {
     poe: "pi has been reset",
     cd: (directory) => `changed path to ${directory}`
   };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <p>OS Testbed webpage</p>
-        <p>COM S 402</p>
-        <p>Group 11</p>
-        <p className="App-terminal">
-        <ReactTerminal
-            commands={commands}
-          />
-          </p>
-      </header>
+    {page === "Login" && <Login setPage={setPage} />}
+    {page === "Terminal" && <Terminal className="Terminal" setPage={setPage} commands={commands} />}
     </div>
 
   );
