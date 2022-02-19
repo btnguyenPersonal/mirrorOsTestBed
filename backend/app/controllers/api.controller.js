@@ -4,51 +4,52 @@ const Password = db.password;
 const User = db.user;
 const bcrypt = require("bcrypt");
 const utils = require("../config/utils.js");
+require("dotenv").config();
 
 const exec = require("await-exec");
-
-async function restartPort(portId) {
-  //console.log("portId: " + portId);
-  return await exec(`./reboot.sh ${portId}`).then((r) => {
-    if (r.stderr) {
-      return false;
-    } else {
-      return true;
-    }
-  });
-}
 
 exports.restart = async (req, res) => {
   const id = req.params.id;
   if (id < 1 || id > 7) {
     res.status(400).send({
-      message: "id must be between 1-7 inclusive.",
+      message: "The port id must be between 1-7 inclusive.",
     });
     return;
   }
-  if (await restartPort(id)) {
-    res.status(400).send({
-      message: "Success.",
-    });
-  } else {
-    res.status(400).send({
-      message: "Failed.",
-    });
+  //This code will eventually be moved into a "runCommand" function.
+  let command = ` ./reboot.sh ${id}`;
+  if (process.env.OS.includes("Windows")) {
+    command = "cd"; //Windows can't run our command without Windows Subsystem for Linux (WSL) and I can't install it lol.
   }
+  return await exec(command)
+    .then((r) => {
+      if (!r.stderr) {
+        res.status(200).send({
+          message: "Command executed successfully.",
+        });
+      } else {
+        res.status(500).send({
+          message: r.stderr,
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err,
+      });
+    });
 };
 
 exports.login = async (req, res) => {
   if (!req.body.email) {
-    res.status(400).send({
-      message: "Requires an email.",
+    res.status(412).send({
+      message: 'Requires an email: "email": <string>',
     });
-    return;
   }
   if (!req.body.password) {
-    res.status(400).send({
-      message: "Requires a password.",
+    res.status(412).send({
+      message: 'Requires a password: "password": <string>',
     });
-    return;
   }
 
   let passwords = await Promise.all([
@@ -67,7 +68,7 @@ exports.login = async (req, res) => {
   const isMatchAdmin = await bcrypt.compare(req.body.password, passwords[1].dataValues.password);
 
   if (!(isMatchAdmin || isMatch)) {
-    res.status(500).send({
+    res.status(401).send({
       message: "Not the password.",
     });
     return;
@@ -94,6 +95,8 @@ exports.login = async (req, res) => {
     });
     res.status(200).send({
       message: "Admin successfully logged in.",
+      usedAdminPassword: true,
+      user: foundUser,
     });
   } else {
     await Event.create({
@@ -102,6 +105,8 @@ exports.login = async (req, res) => {
     });
     res.status(200).send({
       message: "Successfully logged in.",
+      usedAdminPassword: false,
+      user: foundUser,
     });
   }
   return;

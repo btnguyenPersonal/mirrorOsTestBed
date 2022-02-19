@@ -4,8 +4,8 @@ const Op = db.Sequelize.Op;
 
 exports.create = (req, res) => {
   if (!req.body.email) {
-    res.status(400).send({
-      message: "Requires an email.",
+    res.status(412).send({
+      message: 'Requires an email: "email": <string>',
     });
     return;
   }
@@ -45,7 +45,7 @@ exports.findOne = (req, res) => {
       if (data) {
         res.send(data);
       } else {
-        res.status(404).send({
+        res.status(500).send({
           message: `Cannot find User with id=${id}.`,
         });
       }
