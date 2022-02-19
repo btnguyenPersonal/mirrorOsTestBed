@@ -2,21 +2,21 @@ const db = require("../models");
 const Event = db.event;
 const Op = db.Sequelize.Op;
 exports.create = (req, res) => {
-  if (!req.body.event_type_id) {
+  if (!req.body.eventTypeId) {
     res.status(412).send({
-      message: "Requires an event type id.",
+      message: 'Requires an event type: "eventType": <integer>',
     });
     return;
   }
-  if (!req.body.user_id) {
+  if (!req.body.userId) {
     res.status(412).send({
-      message: "Requires a user id.",
+      message: 'Requires a user id: "userId": <integer>',
     });
     return;
   }
   const event = {
-    event_type_id: req.body.event_type_id,
-    user_id: req.body.user_id,
+    eventTypeId: req.body.eventTypeId,
+    userId: req.body.userId,
   };
   Event.create(event)
     .then((data) => {

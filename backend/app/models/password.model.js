@@ -1,23 +1,17 @@
 module.exports = (sequelize, Sequelize) => {
-  const Password = sequelize.define(
-    "password",
-    {
-      password_id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-      },
-      password: {
-        type: Sequelize.STRING,
-      },
-      is_admin_password: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-      },
+  const Password = sequelize.define("passwords", {
+    passwordId: {
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
-    {
-      updatedAt: false,
-    }
-  );
+    password: {
+      type: Sequelize.STRING,
+    },
+    isAdminPassword: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+  });
   return Password;
 };

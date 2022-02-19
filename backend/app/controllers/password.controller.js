@@ -12,15 +12,15 @@ function isBodyValid(req, res) {
     });
     return false;
   }
-  if (!req.body.auth_email) {
+  if (!req.body.authEmail) {
     res.status(412).send({
-      message: 'Requires an email: "auth_email": <string>',
+      message: 'Requires an email: "authEmail": <string>',
     });
     return false;
   }
-  if (req.body.change_admin_password != 0 && req.body.change_admin_password != 1) {
+  if (req.body.changeAdminPassword != 0 && req.body.changeAdminPassword != 1) {
     res.status(412).send({
-      message: 'Requires which password you would like to change: "change_admin_password": <boolean>',
+      message: 'Requires which password you would like to change: "changeAdminPassword": <boolean>',
     });
     return false;
   }
@@ -29,24 +29,25 @@ function isBodyValid(req, res) {
 
 exports.create = async (req, res) => {
   if (!isBodyValid(req, res)) return;
-  User.findOne({ where: { email: req.body.auth_email } }).then(async (data) => {
+  User.findOne({ where: { email: req.body.authEmail } }).then(async (data) => {
     if (data) {
-      if (data.dataValues.is_admin) {
-        hashed_password = await bcrypt.hash(req.body.password, 10);
+      if (data.dataValues.isAdmin) {
+        hashedPassword = await bcrypt.hash(req.body.password, 10);
         let sqlPassword = await Password.findOne({
-          where: { is_admin_password: req.body.change_admin_password },
+          where: { isAdminPassword: req.body.changeAdminPassword },
           order: [["createdAt", "DESC"]],
         });
-        sqlPassword.password = hashed_password;
+        sqlPassword.password = hashedPassword;
         await sqlPassword.save();
         await Event.create({
-          event_type_id: req.body.change_admin_password
+          eventTypeId: req.body.changeAdminPassword
             ? utils.CHANGED_ADMIN_PASSWORD_EVENT_ID
             : utils.CHANGED_PASSWORD_EVENT_ID,
-          user_id: data.dataValues.user_id,
+          userId: data.dataValues.userId,
         });
         res.status(200).send({
-          message: (req.body.change_admin_password ? "Admin password" : "Password") + " changed successfully.",
+          message: (req.body.changeAdminPassword ? "Admin password" : "Password") + " changed successfully.",
+          password: sqlPassword,
         });
       } else {
         res.status(403).send({
@@ -55,7 +56,7 @@ exports.create = async (req, res) => {
       }
     } else {
       res.status(401).send({
-        message: "Couldn't find email: " + req.body.auth_email,
+        message: "Couldn't find email: " + req.body.authEmail,
       });
     }
   });

@@ -8,21 +8,21 @@ var corsOptions = {
 };
 
 const db = require("./app/models");
-const EventType = db.event_type;
+const EventType = db.eventType;
 const Password = db.password;
 
 //The following is to wipe the database everytime.
 db.sequelize.sync({ force: true }).then(async () => {
   console.log("Drop and re-sync db.");
   //Order in which event types are created matters. See utils file for correct order.
-  EventType.create({ event_type: "login" });
-  EventType.create({ event_type: "admin login" });
-  EventType.create({ event_type: "changed password" });
-  EventType.create({ event_type: "changed admin password" });
-  hashed_password = await bcrypt.hash("password", 10);
-  Password.create({ password: hashed_password, is_admin_password: 0 });
-  hashed_password = await bcrypt.hash("adminpassword", 10);
-  Password.create({ password: hashed_password, is_admin_password: 1 });
+  EventType.create({ eventType: "login" });
+  EventType.create({ eventType: "admin login" });
+  EventType.create({ eventType: "changed password" });
+  EventType.create({ eventType: "changed admin password" });
+  hashedPassword = await bcrypt.hash("password", 10);
+  Password.create({ password: hashedPassword, isAdminPassword: 0 });
+  hashedPassword = await bcrypt.hash("adminpassword", 10);
+  Password.create({ password: hashedPassword, isAdminPassword: 1 });
 });
 
 app.use(cors(corsOptions));
@@ -35,7 +35,7 @@ app.get("/", (req, res) => {
   res.json({ message: "Basic app." });
 });
 require("./app/routes/user.routes")(app);
-require("./app/routes/event_type.routes")(app);
+require("./app/routes/eventType.routes")(app);
 require("./app/routes/event.routes")(app);
 require("./app/routes/api.routes")(app);
 require("./app/routes/password.routes")(app);

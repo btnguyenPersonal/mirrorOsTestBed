@@ -54,11 +54,11 @@ exports.login = async (req, res) => {
 
   let passwords = await Promise.all([
     Password.findOne({
-      where: { is_admin_password: 0 },
+      where: { isAdminPassword: 0 },
       order: [["createdAt", "DESC"]],
     }),
     Password.findOne({
-      where: { is_admin_password: 1 },
+      where: { isAdminPassword: 1 },
       order: [["createdAt", "DESC"]],
     }),
   ]).then((modelReturn) => {
@@ -85,13 +85,13 @@ exports.login = async (req, res) => {
   }
   if (isMatchAdmin) {
     //If user is not an admin but used the admin password, then we should update their admin status.
-    if (!foundUser.is_admin) {
-      foundUser.is_admin = 1;
+    if (!foundUser.isAdmin) {
+      foundUser.isAdmin = 1;
       await foundUser.save();
     }
     await Event.create({
-      event_type_id: utils.ADMIN_LOGIN_EVENT_ID,
-      user_id: foundUser.dataValues.user_id,
+      eventTypeId: utils.ADMIN_LOGIN_EVENT_ID,
+      userId: foundUser.dataValues.userId,
     });
     res.status(200).send({
       message: "Admin successfully logged in.",
@@ -100,8 +100,8 @@ exports.login = async (req, res) => {
     });
   } else {
     await Event.create({
-      event_type_id: utils.LOGIN_EVENT_ID,
-      user_id: foundUser.dataValues.user_id,
+      eventTypeId: utils.LOGIN_EVENT_ID,
+      userId: foundUser.dataValues.userId,
     });
     res.status(200).send({
       message: "Successfully logged in.",

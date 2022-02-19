@@ -1,13 +1,13 @@
 module.exports = (sequelize, Sequelize) => {
   const EventType = sequelize.define(
-    "event_type",
+    "event_types",
     {
-      event_type_id: {
+      eventTypeId: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
       },
-      event_type: {
+      eventType: {
         type: Sequelize.STRING,
       },
     },

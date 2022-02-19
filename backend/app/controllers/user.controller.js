@@ -12,8 +12,8 @@ exports.create = (req, res) => {
   const user = {
     email: req.body.email,
   };
-  if (req.body.is_admin) {
-    user.is_admin = req.body.is_admin;
+  if (req.body.isAdmin) {
+    user.isAdmin = req.body.isAdmin;
   }
   User.create(user)
     .then((data) => {

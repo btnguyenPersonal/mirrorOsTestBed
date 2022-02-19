@@ -5,7 +5,7 @@ const Op = db.Sequelize.Op;
 exports.create = (req, res) => {
   if (!req.body.event_type) {
     res.status(412).send({
-      message: 'Requires an event type: "event_type": <string>',
+      message: 'Requires an event type: "eventType": <integer>',
     });
     return;
   }
