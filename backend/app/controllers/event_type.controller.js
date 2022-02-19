@@ -1,6 +1,7 @@
 const db = require("../models");
 const EventType = db.event_types;
 const Op = db.Sequelize.Op;
+
 exports.create = (req, res) => {
     if (!req.body.event_type) {
         res.status(400).send({

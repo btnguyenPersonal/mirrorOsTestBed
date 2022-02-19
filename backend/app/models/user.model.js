@@ -6,8 +6,15 @@ module.exports = (sequelize, Sequelize) => {
             autoIncrement: true
         },
         email: {
-            type: Sequelize.STRING
-        }
+            type: Sequelize.STRING,
+            unique: true
+        },
+        is_admin: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: 0
+        },
+    }, {
+        updatedAt: false
     });
     return User;
 };    

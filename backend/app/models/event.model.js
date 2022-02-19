@@ -10,7 +10,9 @@ module.exports = (sequelize, Sequelize) => {
         },
         user_id: {
             type: Sequelize.INTEGER
-        }
+        },
+    }, {
+        updatedAt: false
     });
     return Event;
 };    
