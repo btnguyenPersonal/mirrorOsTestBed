@@ -45,11 +45,13 @@ exports.login = async (req, res) => {
     res.status(412).send({
       message: 'Requires an email: "email": <string>',
     });
+    return;
   }
   if (!req.body.password) {
     res.status(412).send({
       message: 'Requires a password: "password": <string>',
     });
+    return;
   }
 
   let passwords = await Promise.all([
