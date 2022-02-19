@@ -13,9 +13,11 @@ const Password = db.password;
 //The following is to wipe the database everytime.
 db.sequelize.sync({ force: true }).then(async () => {
   console.log("Drop and re-sync db.");
+  //Order in which event types are created matters. See utils file for correct order.
   EventType.create({ event_type: "login" });
   EventType.create({ event_type: "admin login" });
   EventType.create({ event_type: "changed password" });
+  EventType.create({ event_type: "changed admin password" });
   hashed_password = await bcrypt.hash("password", 10);
   Password.create({ password: hashed_password, is_admin_password: 0 });
   hashed_password = await bcrypt.hash("adminpassword", 10);

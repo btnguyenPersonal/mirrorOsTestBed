@@ -1,8 +1,9 @@
-const { user } = require("../models");
 const db = require("../models");
 const bcrypt = require("bcrypt");
 const Password = db.password;
 const User = db.user;
+const Event = db.event;
+const utils = require("../config/utils.js");
 console.log(Password);
 
 function isBodyValid(req, res) {
@@ -39,6 +40,12 @@ exports.create = async (req, res) => {
         });
         sqlPassword.password = hashed_password;
         await sqlPassword.save();
+        await Event.create({
+          event_type_id: req.body.change_admin_password
+            ? utils.CHANGED_ADMIN_PASSWORD_EVENT_ID
+            : utils.CHANGED_PASSWORD_EVENT_ID,
+          user_id: data.dataValues.user_id,
+        });
         res.status(200).send({
           message: (req.body.change_admin_password ? "Admin password" : "Password") + " changed successfully.",
         });

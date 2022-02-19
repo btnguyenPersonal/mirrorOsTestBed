@@ -3,9 +3,7 @@ const Event = db.event;
 const Password = db.password;
 const User = db.user;
 const bcrypt = require("bcrypt");
-
-const LOGIN_EVENT_ID = 1;
-const ADMIN_LOGIN_EVENT_ID = 2;
+const utils = require("../config/utils.js");
 
 const exec = require("await-exec");
 
@@ -91,7 +89,7 @@ exports.login = async (req, res) => {
       await foundUser.save();
     }
     await Event.create({
-      event_type_id: ADMIN_LOGIN_EVENT_ID,
+      event_type_id: utils.ADMIN_LOGIN_EVENT_ID,
       user_id: foundUser.dataValues.user_id,
     });
     res.status(200).send({
@@ -99,7 +97,7 @@ exports.login = async (req, res) => {
     });
   } else {
     await Event.create({
-      event_type_id: LOGIN_EVENT_ID,
+      event_type_id: utils.LOGIN_EVENT_ID,
       user_id: foundUser.dataValues.user_id,
     });
     res.status(200).send({
