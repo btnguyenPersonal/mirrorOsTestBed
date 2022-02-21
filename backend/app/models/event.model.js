@@ -1,16 +1,22 @@
 module.exports = (sequelize, Sequelize) => {
-    const Event = sequelize.define("event", {
-        event_id: {
-            type: Sequelize.INTEGER,
-            primaryKey: true,
-            autoIncrement: true
-        },
-        event_type_id: {
-            type: Sequelize.INTEGER
-        },
-        user_id: {
-            type: Sequelize.INTEGER
-        }
-    });
-    return Event;
-};    
+  const Event = sequelize.define(
+    "events",
+    {
+      eventId: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      eventTypeId: {
+        type: Sequelize.INTEGER,
+      },
+      userId: {
+        type: Sequelize.INTEGER,
+      },
+    },
+    {
+      updatedAt: false,
+    }
+  );
+  return Event;
+};
