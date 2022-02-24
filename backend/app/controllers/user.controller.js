@@ -3,6 +3,7 @@ const User = db.user;
 const Op = db.Sequelize.Op;
 
 exports.create = (req, res) => {
+  // #swagger.tags = ['user']
   if (!req.body.email) {
     res.status(412).send({
       message: 'Requires an email: "email": <string>',
@@ -27,6 +28,7 @@ exports.create = (req, res) => {
 };
 
 exports.findAll = (req, res) => {
+  // #swagger.tags = ['user']
   User.findAll()
     .then((data) => {
       res.send(data);
@@ -39,6 +41,7 @@ exports.findAll = (req, res) => {
 };
 
 exports.findOne = (req, res) => {
+  // #swagger.tags = ['user']
   const id = req.params.id;
   User.findByPk()
     .then((data) => {
