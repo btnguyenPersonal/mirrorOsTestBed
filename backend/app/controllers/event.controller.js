@@ -2,6 +2,7 @@ const db = require("../models");
 const Event = db.event;
 const Op = db.Sequelize.Op;
 exports.create = (req, res) => {
+  // #swagger.tags = ['event']
   if (!req.body.eventTypeId) {
     res.status(412).send({
       message: 'Requires an event type: "eventType": <integer>',
@@ -30,6 +31,7 @@ exports.create = (req, res) => {
 };
 
 exports.findAll = (req, res) => {
+  // #swagger.tags = ['event']
   Event.findAll()
     .then((data) => {
       res.send(data);
@@ -42,6 +44,7 @@ exports.findAll = (req, res) => {
 };
 
 exports.findOne = (req, res) => {
+  // #swagger.tags = ['event']
   const id = req.params.id;
   Event.findByPk(id)
     .then((data) => {

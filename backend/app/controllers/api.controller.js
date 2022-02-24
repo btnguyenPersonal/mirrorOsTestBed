@@ -8,11 +8,25 @@ require("dotenv").config();
 
 const exec = require("await-exec");
 
+const NUMBER_OF_PORTS = 7;
+
 exports.restart = async (req, res) => {
+  /*
+    #swagger.tags = ['api']
+    #swagger.description = 'Restarts the PoE for a specific port by calling a script on the backend.'
+    #swagger.parameters['id'] = { 
+      in: 'path',
+      description: 'The port id to restart. Must be in the range [1,7].' ,
+      type: 'integer'
+    }
+    #swagger.responses[200] = { description: 'Sent when the command was executed successfully.' }
+    #swagger.responses[400] = { description: 'Sent when something is wrong with your request that is within frontend\'s control.' }
+    #swagger.responses[500] = { description: 'Sent when something went wrong with the backend outside of frontend\'s control.' }
+  */
   const id = req.params.id;
-  if (id < 1 || id > 7) {
+  if (id < 1 || id > NUMBER_OF_PORTS) {
     res.status(400).send({
-      message: "The port id must be between 1-7 inclusive.",
+      message: `The port id must be between 1-${NUMBER_OF_PORTS} inclusive.`,
     });
     return;
   }
@@ -41,6 +55,38 @@ exports.restart = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
+  /*
+    #swagger.tags = ['api']
+    #swagger.description = 'Use this to login to the website.'
+  
+    #swagger.parameters['body'] = { 
+      in: 'body',
+      schema: {
+        email: 'email@email.com',
+        password: 'somePassword48$'
+      },
+      description: 'A json object containing the email and password of a user attempting to log in.'
+    }
+  
+    #swagger.responses[200] = { 
+      description: 'Sent when a user successfully logs in.' ,
+      schema: {
+        "message": "Successfully logged in.",
+        "usedAdminPassword": false,
+        "isNewUser": true,
+        "user": {
+          "isAdmin": false,
+          "userId": 1,
+          "email": "email@email.com",
+          "updatedAt": "2022-02-24T02:26:42.581Z",
+          "createdAt": "2022-02-24T02:26:42.581Z"
+        }
+      }
+    }
+  
+    #swagger.responses[401] = { description: 'Sent when the password was incorrect.' }
+    #swagger.responses[412] = { description: 'Sent when something is wrong with your request\'s json object.' }
+  */
   if (!req.body.email) {
     res.status(412).send({
       message: 'Requires an email: "email": <string>',
@@ -56,12 +102,20 @@ exports.login = async (req, res) => {
 
   let passwords = await Promise.all([
     Password.findOne({
-      where: { isAdminPassword: 0 },
-      order: [["createdAt", "DESC"]],
+      where: {
+        isAdminPassword: 0
+      },
+      order: [
+        ["createdAt", "DESC"]
+      ],
     }),
     Password.findOne({
-      where: { isAdminPassword: 1 },
-      order: [["createdAt", "DESC"]],
+      where: {
+        isAdminPassword: 1
+      },
+      order: [
+        ["createdAt", "DESC"]
+      ],
     }),
   ]).then((modelReturn) => {
     return modelReturn.flat();
@@ -75,13 +129,19 @@ exports.login = async (req, res) => {
     });
     return;
   }
+  let isNewUser = false;
   let foundUser = await User.findOne({
-    where: { email: req.body.email },
+    where: {
+      email: req.body.email
+    },
   }).then((foundUser) => {
     return foundUser;
   });
   if (!foundUser) {
-    foundUser = await User.create({ email: req.body.email }).then((user) => {
+    isNewUser = true;
+    foundUser = await User.create({
+      email: req.body.email
+    }).then((user) => {
       return user;
     });
   }
@@ -98,6 +158,7 @@ exports.login = async (req, res) => {
     res.status(200).send({
       message: "Admin successfully logged in.",
       usedAdminPassword: true,
+      isNewUser: isNewUser,
       user: foundUser,
     });
   } else {
@@ -108,6 +169,7 @@ exports.login = async (req, res) => {
     res.status(200).send({
       message: "Successfully logged in.",
       usedAdminPassword: false,
+      isNewUser: isNewUser,
       user: foundUser,
     });
   }

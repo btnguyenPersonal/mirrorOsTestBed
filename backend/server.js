@@ -2,6 +2,10 @@ const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
+
+const swaggerUi = require('swagger-ui-express')
+const swaggerFile = require('./app/config/swagger_output.json')
+
 const app = express();
 var corsOptions = {
   origin: "http://localhost:3000",
@@ -44,3 +48,5 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
+
+app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
