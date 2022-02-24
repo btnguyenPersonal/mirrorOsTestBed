@@ -28,21 +28,30 @@ function isBodyValid(req, res) {
 }
 
 exports.create = async (req, res) => {
+  // #swagger.tags = ['password']
   if (!isBodyValid(req, res)) return;
-  User.findOne({ where: { email: req.body.authEmail } }).then(async (data) => {
+  User.findOne({
+    where: {
+      email: req.body.authEmail
+    }
+  }).then(async (data) => {
     if (data) {
       if (data.dataValues.isAdmin) {
         hashedPassword = await bcrypt.hash(req.body.password, 10);
         let sqlPassword = await Password.findOne({
-          where: { isAdminPassword: req.body.changeAdminPassword },
-          order: [["createdAt", "DESC"]],
+          where: {
+            isAdminPassword: req.body.changeAdminPassword
+          },
+          order: [
+            ["createdAt", "DESC"]
+          ],
         });
         sqlPassword.password = hashedPassword;
         await sqlPassword.save();
         await Event.create({
-          eventTypeId: req.body.changeAdminPassword
-            ? utils.CHANGED_ADMIN_PASSWORD_EVENT_ID
-            : utils.CHANGED_PASSWORD_EVENT_ID,
+          eventTypeId: req.body.changeAdminPassword ?
+            utils.CHANGED_ADMIN_PASSWORD_EVENT_ID :
+            utils.CHANGED_PASSWORD_EVENT_ID,
           userId: data.dataValues.userId,
         });
         res.status(200).send({
@@ -63,6 +72,7 @@ exports.create = async (req, res) => {
 };
 
 exports.findAll = (req, res) => {
+  // #swagger.tags = ['password']
   Password.findAll()
     .then((data) => {
       res.send(data);
@@ -75,6 +85,7 @@ exports.findAll = (req, res) => {
 };
 
 exports.findOne = (req, res) => {
+  // #swagger.tags = ['password']
   const id = req.params.id;
   Password.findByPk(id)
     .then((data) => {

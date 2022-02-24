@@ -1,0 +1,530 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "OSTestBed API",
+    "description": "OSTestBed API"
+  },
+  "host": "localhost:8080",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "api",
+      "description": "general endpoints not associated with an entity (endpoints you care about)."
+    },
+    {
+      "name": "user",
+      "description": "endpoints related to users."
+    },
+    {
+      "name": "event",
+      "description": "endpoints related to events."
+    },
+    {
+      "name": "event_type",
+      "description": "endpoints related to event_types."
+    },
+    {
+      "name": "password",
+      "description": "endpoints related to passwords."
+    }
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/login": {
+      "post": {
+        "tags": [
+          "api"
+        ],
+        "description": "Use this to login to the website.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "email@email.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "somePassword48$"
+                }
+              }
+            },
+            "description": "A json object containing the email and password of a user attempting to log in."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sent when a user successfully logs in.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Successfully logged in."
+                },
+                "usedAdminPassword": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "isNewUser": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "isAdmin": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "userId": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "email@email.com"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "example": "2022-02-24T02:26:42.581Z"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "example": "2022-02-24T02:26:42.581Z"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Sent when the password was incorrect."
+          },
+          "412": {
+            "description": "Sent when something is wrong with your request's json object."
+          }
+        }
+      }
+    },
+    "/api/restart/{id}": {
+      "post": {
+        "tags": [
+          "api"
+        ],
+        "description": "Restarts the PoE for a specific port by calling a script on the backend.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The port id to restart. Must be in the range [1,7]."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sent when the command was executed successfully."
+          },
+          "400": {
+            "description": "Sent when something is wrong with your request that is within frontend's control."
+          },
+          "500": {
+            "description": "Sent when something went wrong with the backend outside of frontend's control."
+          }
+        }
+      }
+    },
+    "/api/event/": {
+      "post": {
+        "tags": [
+          "event"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "eventTypeId": {
+                  "example": "any"
+                },
+                "userId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "412": {
+            "description": "Precondition Failed"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "event"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/event/{id}": {
+      "get": {
+        "tags": [
+          "event"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/event_types/": {
+      "post": {
+        "tags": [
+          "event_type"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "event_type": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "412": {
+            "description": "Precondition Failed"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "event_type"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/event_types/{id}": {
+      "get": {
+        "tags": [
+          "event_type"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/password/": {
+      "post": {
+        "tags": [
+          "password"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "authEmail": {
+                  "example": "any"
+                },
+                "password": {
+                  "example": "any"
+                },
+                "changeAdminPassword": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "password"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/password/{id}": {
+      "get": {
+        "tags": [
+          "password"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/user/": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "any"
+                },
+                "isAdmin": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "412": {
+            "description": "Precondition Failed"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/user/{id}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "number",
+          "example": 1
+        },
+        "email": {
+          "type": "string",
+          "example": "email@email.com"
+        },
+        "isAdmin": {
+          "type": "boolean",
+          "example": false
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2022-02-24T02:26:42.581Z"
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2022-02-24T02:26:42.581Z"
+        }
+      }
+    },
+    "Password": {
+      "type": "object",
+      "properties": {
+        "passwordId": {
+          "type": "number",
+          "example": 1
+        },
+        "password": {
+          "type": "string",
+          "example": "<hashed>"
+        },
+        "isAdminPassword": {
+          "type": "boolean",
+          "example": false
+        }
+      }
+    },
+    "Event": {
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "number",
+          "example": 1
+        },
+        "eventTypeId": {
+          "type": "number",
+          "example": 2
+        },
+        "userId": {
+          "type": "number",
+          "example": 1
+        }
+      }
+    },
+    "EventType": {
+      "type": "object",
+      "properties": {
+        "eventTypeId": {
+          "type": "number",
+          "example": 1
+        },
+        "eventType": {
+          "type": "string",
+          "example": "some event"
+        }
+      }
+    }
+  }
+}
