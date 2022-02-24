@@ -18,19 +18,24 @@ function Login({ setPage }) {
 
   function sendCredentials(email,password)
   {
-    const login = { email, password};
+
+    const login = {email, password};
     fetch("http://localhost:8080/api/login", {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(login)
-    }).then((data) => {
-      if(data.status===200){ 
-        console.log("Success");
-        setPage("Terminal");
-      }else{
-        console.log("Failure");
-      }
+    }).then(async (response) => {
+       if(response.status===200){ 
+         let json = await response.json();
+        if(json.usedAdminPassword)
+          setPage("AdminDashboard");
+        else
+          setPage("Dashboard");
+       }else{
+         console.log("Failure");
+       }
     })
+
   }
 
   let content = (
@@ -42,6 +47,7 @@ function Login({ setPage }) {
           <Form.Control
             autoFocus
             className="input_field"
+            pattern=".+@iastate\.edu"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -60,7 +66,6 @@ function Login({ setPage }) {
           Login
         </Button>
       </Form>
-      <Button onClick={() => setPage("Terminal")}>Next Page Only here until login request works</Button>
     </div>
   );
 

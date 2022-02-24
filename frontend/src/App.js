@@ -3,6 +3,8 @@ import './Terminal.css';
 import Terminal from './Terminal'
 import Login from './Login';
 import React, { useState } from 'react';
+import Dashboard from './dashboards/Dashboard';
+import AdminDashboard from './dashboards/AdminDashboard';
 
 function App() {
   const [page, setPage] = useState("Login");
@@ -18,6 +20,8 @@ function App() {
   return (
     <div className="App">
     {page === "Login" && <Login setPage={setPage} />}
+    {page === "Dashboard" && <Dashboard setPage={setPage} />}
+    {page === "AdminDashboard" && <AdminDashboard setPage={setPage} />}
     {page === "Terminal" && <Terminal className="Terminal" setPage={setPage} commands={commands} />}
     </div>
 
