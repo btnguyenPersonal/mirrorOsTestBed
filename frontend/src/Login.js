@@ -12,30 +12,28 @@ function Login({ setPage }) {
   }
 
   function handleSubmit(event) {
-    sendCredentials(email,password);
+    sendCredentials(email, password);
     event.preventDefault();
   }
 
-  function sendCredentials(email,password)
-  {
-
-    const login = {email, password};
+  function sendCredentials(email, password) {
+    const login = { email, password };
     fetch("http://localhost:8080/api/login", {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(login)
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(login),
     }).then(async (response) => {
-       if(response.status===200){ 
-         let json = await response.json();
-        if(json.usedAdminPassword)
+      if (response.status === 200) {
+        let json = await response.json();
+        if (json.usedAdminPassword) {
           setPage("AdminDashboard");
-        else
+        } else {
           setPage("Dashboard");
-       }else{
-         console.log("Failure");
-       }
-    })
-
+        }
+      } else {
+        console.log("Failure");
+      }
+    });
   }
 
   let content = (
