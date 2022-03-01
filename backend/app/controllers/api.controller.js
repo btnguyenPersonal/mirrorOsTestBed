@@ -200,6 +200,7 @@ exports.useComputer = async (req, res) => {
   }
   const userId = req.body.userId;
   const computerId = req.body.computerId;
+  //Check if computer is in use.
   let computer = await Computer.findByPk(computerId)
     .then((computer) => {
       if (computer) {
@@ -220,6 +221,22 @@ exports.useComputer = async (req, res) => {
   if (computer.inUse) {
     res.status(500).send({
       message: "Computer with id=" + computerId + " is in use.",
+    });
+    return;
+  }
+  //Check if they already have a computer.
+  let session = await Session.findOne({
+    where: {
+      userId: userId,
+      endTime: null,
+    },
+    order: [["startTime", "DESC"]],
+  }).then((session) => {
+    return session;
+  });
+  if (session) {
+    res.status(500).send({
+      message: `User has an open session with computerId: ${session.computerId}. Users can only have 1 computer at a time.`,
     });
     return;
   }
