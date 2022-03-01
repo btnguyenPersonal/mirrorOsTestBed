@@ -1,4 +1,4 @@
-const db = require("../models");
+const db = require("..");
 const EventType = db.event_types;
 const Op = db.Sequelize.Op;
 
