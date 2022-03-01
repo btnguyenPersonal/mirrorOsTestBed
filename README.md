@@ -17,7 +17,9 @@ CREATE DATABASE ostestbed;
 ``` 
 
 1. Create a new user and give access to ostestbed
-`GRANT ALL PRIVILEGES ON ostestbed.* TO '<insert your user here>'@'localhost' IDENTIFIED BY '<insert your password here>';`
+```sql
+GRANT ALL PRIVILEGES ON ostestbed.* TO '<insert your user here>'@'localhost' IDENTIFIED BY '<insert your password here>';
+````
 
 #### `.env`
 

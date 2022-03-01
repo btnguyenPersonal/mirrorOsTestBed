@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
@@ -21,7 +19,7 @@ function Login({ setPage }) {
   function sendCredentials(email,password)
   {
     const login = { email, password};
-    fetch(`http://${process.env.IP}:8080/api/login`, {
+    fetch(`http://${process.env.REACT_APP_IP}:8080/api/login`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(login)
