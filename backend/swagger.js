@@ -74,6 +74,19 @@ const doc = {
       eventTypeId: 1,
       eventType: "some event",
     },
+    Computer: {
+      computerId: "integer - the computer ID, autoincremented.",
+      portId: "integer - the port ID this computer is plugged into on the switch.",
+      model: "string - the model of the machine",
+      inUse: "boolean - if machine is in use.",
+    },
+    Session: {
+      sessionId: "integer - the session ID, autoincremented.",
+      userId: "integer - the ID of the user who owns this session.",
+      computerId: "integer - the ID of the computer for this session.",
+      startTime: "datetime - the time this session started.",
+      endTime: "datetime - the time this session ended (or null if still live).",
+    },
   },
 };
 
