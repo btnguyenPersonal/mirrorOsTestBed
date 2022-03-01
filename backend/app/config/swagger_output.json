@@ -27,14 +27,6 @@
     {
       "name": "password",
       "description": "endpoints related to passwords."
-    },
-    {
-      "name": "computer",
-      "description": "endpoints related to computers."
-    },
-    {
-      "name": "session",
-      "description": "endpoints related to sessions."
     }
   ],
   "schemes": [
@@ -144,7 +136,7 @@
             "in": "path",
             "required": true,
             "type": "integer",
-            "description": "The port id to restart."
+            "description": "The port id to restart. Must be in the range [1,7]."
           }
         ],
         "responses": {
@@ -153,84 +145,6 @@
           },
           "400": {
             "description": "Sent when something is wrong with your request that is within frontend's control."
-          },
-          "500": {
-            "description": "Sent when something went wrong with the backend outside of frontend's control."
-          }
-        }
-      }
-    },
-    "/api/useComputer/": {
-      "post": {
-        "tags": [
-          "api"
-        ],
-        "description": "Use this to use a computer. i.e., Call when a user is attempting to user a pi\\'s terminal. Send the user ID who is requesting the computer, and the computer ID they want (not the port ID)",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "userId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "computerId": {
-                  "type": "number",
-                  "example": 2
-                }
-              }
-            },
-            "description": ""
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Sent when the computer is put in use."
-          },
-          "412": {
-            "description": "Sent when something is wrong with your request's json object."
-          },
-          "500": {
-            "description": "Sent when something went wrong with the backend outside of frontend's control."
-          }
-        }
-      }
-    },
-    "/api/releaseComputer/": {
-      "post": {
-        "tags": [
-          "api"
-        ],
-        "description": "Use this to release a computer. i.e., A user\\'s session with the terminal has ended.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "userId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "computerId": {
-                  "type": "number",
-                  "example": 2
-                }
-              }
-            },
-            "description": ""
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Sent when the computer is released."
-          },
-          "412": {
-            "description": "Sent when something is wrong with your request's json object."
           },
           "500": {
             "description": "Sent when something went wrong with the backend outside of frontend's control."
@@ -264,6 +178,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "412": {
+            "description": "Precondition Failed"
           },
           "500": {
             "description": "Internal Server Error"
@@ -310,7 +227,7 @@
         }
       }
     },
-    "/api/eventTypes/": {
+    "/api/event_types/": {
       "post": {
         "tags": [
           "event_type"
@@ -358,7 +275,7 @@
         }
       }
     },
-    "/api/eventTypes/{id}": {
+    "/api/event_types/{id}": {
       "get": {
         "tags": [
           "event_type"
@@ -515,153 +432,6 @@
       "get": {
         "tags": [
           "user"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/computer/": {
-      "post": {
-        "tags": [
-          "computer"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "portId": {
-                  "example": "any"
-                },
-                "model": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "computer"
-        ],
-        "description": "",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/computer/{id}": {
-      "get": {
-        "tags": [
-          "computer"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/session/": {
-      "post": {
-        "tags": [
-          "session"
-        ],
-        "description": "Not used in prod. Just for testing.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "userId": {
-                  "type": "number",
-                  "example": 1
-                },
-                "computerId": {
-                  "type": "number",
-                  "example": 2
-                }
-              }
-            },
-            "description": "A json object containing the user getting the computer and the computer id of the new session."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "session"
-        ],
-        "description": "",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/session/{id}": {
-      "get": {
-        "tags": [
-          "session"
         ],
         "description": "",
         "parameters": [

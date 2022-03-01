@@ -1,16 +1,18 @@
-const db = require("..");
+const db = require("../models");
 const Event = db.event;
-const utils = require("../config/utils.js");
 const Op = db.Sequelize.Op;
 exports.create = (req, res) => {
   // #swagger.tags = ['event']
-
-  if (
-    !utils.isBodyValid(req, res, {
-      eventTypeId: "integer",
-      userId: "integer",
-    })
-  ) {
+  if (!req.body.eventTypeId) {
+    res.status(412).send({
+      message: 'Requires an event type: "eventType": <integer>',
+    });
+    return;
+  }
+  if (!req.body.userId) {
+    res.status(412).send({
+      message: 'Requires a user id: "userId": <integer>',
+    });
     return;
   }
   const event = {
