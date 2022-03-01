@@ -37,6 +37,7 @@ DB_SCHEMA="ostestbed"
 DB_HOST="localhost"
 IP="localhost"
 PORT=8080
+OS="<insert your OS here>"
 ```
 
 ---
