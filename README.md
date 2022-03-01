@@ -53,11 +53,13 @@ IP="localhost"
 
 run inside of `backend/` to start the backend server
 ```sh
+npm install
 npm start
 ```
 
 run inside of `frontend/` to start the frontend server
 ```sh
+npm install
 npm start
 ```
 
