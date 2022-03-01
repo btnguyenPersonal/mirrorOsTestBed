@@ -12,7 +12,7 @@ const exec = require("await-exec");
 
 const NUMBER_OF_PORTS = 7;
 
-exports.restartPort = async (req, res) => {
+exports.rebootPort = async (req, res) => {
   /*
     #swagger.tags = ['api']
     #swagger.description = 'Restarts the PoE for a specific port by calling a script on the backend.'
