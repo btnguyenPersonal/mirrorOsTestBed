@@ -102,13 +102,17 @@ exports.login = async (req, res) => {
       where: {
         isAdminPassword: 0,
       },
-      order: [["createdAt", "DESC"]],
+      order: [
+        ["createdAt", "DESC"]
+      ],
     }),
     Password.findOne({
       where: {
         isAdminPassword: 1,
       },
-      order: [["createdAt", "DESC"]],
+      order: [
+        ["createdAt", "DESC"]
+      ],
     }),
   ]).then((modelReturn) => {
     return modelReturn.flat();
@@ -190,6 +194,8 @@ exports.useComputer = async (req, res) => {
     #swagger.responses[500] = { description: 'Sent when something went wrong with the backend outside of frontend\'s control.' }
   */
 
+
+  //Need to setup websockets, start the connection.
   if (
     !utils.isBodyValid(req, res, {
       userId: "integer",
@@ -230,7 +236,9 @@ exports.useComputer = async (req, res) => {
       userId: userId,
       endTime: null,
     },
-    order: [["startTime", "DESC"]],
+    order: [
+      ["startTime", "DESC"]
+    ],
   }).then((session) => {
     return session;
   });
@@ -242,7 +250,8 @@ exports.useComputer = async (req, res) => {
   }
   computer.inUse = true;
   await computer.save();
-  await Session.create({
+
+  let newSession = await Session.create({
     userId: userId,
     computerId: computerId,
     startTime: Date.now(),
@@ -250,6 +259,7 @@ exports.useComputer = async (req, res) => {
   await Event.create({
     eventTypeId: utils.SESSION_START_EVENT_ID,
     userId: userId,
+    newSession,
   });
   res.status(200).send({
     message: `Success! You are now in control of id=${computerId}`,
@@ -276,6 +286,8 @@ exports.releaseComputer = async (req, res) => {
     #swagger.responses[412] = { description: 'Sent when something is wrong with your request\'s json object.' }
     #swagger.responses[500] = { description: 'Sent when something went wrong with the backend outside of frontend\'s control.' }
   */
+
+  //Need to setup websockets, end the connection.
   if (
     !utils.isBodyValid(req, res, {
       userId: "integer",
@@ -314,7 +326,9 @@ exports.releaseComputer = async (req, res) => {
       userId: userId,
       endTime: null,
     },
-    order: [["startTime", "DESC"]],
+    order: [
+      ["startTime", "DESC"]
+    ],
   }).then((session) => {
     return session;
   });

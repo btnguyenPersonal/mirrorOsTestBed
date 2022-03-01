@@ -132,7 +132,7 @@
         }
       }
     },
-    "/api/restart/{id}": {
+    "/api/reboot/{id}": {
       "post": {
         "tags": [
           "api"
