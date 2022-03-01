@@ -1,62 +1,60 @@
 const db = require("..");
-const Event = db.event;
+const Computer = db.computer;
 const utils = require("../config/utils.js");
-const Op = db.Sequelize.Op;
 exports.create = (req, res) => {
-  // #swagger.tags = ['event']
-
+  // #swagger.tags = ['computer']
   if (
     !utils.isBodyValid(req, res, {
-      eventTypeId: "integer",
-      userId: "integer",
+      portId: "integer",
+      model: "string",
     })
   ) {
     return;
   }
-  const event = {
-    eventTypeId: req.body.eventTypeId,
-    userId: req.body.userId,
+  const computer = {
+    portId: req.body.portId,
+    model: req.body.model,
   };
-  Event.create(event)
+  Computer.create(computer)
     .then((data) => {
       res.send(data);
     })
     .catch((err) => {
       res.status(500).send({
-        message: err.message || "Some error occurred while creating the Event.",
+        message: err.message || "Some error occurred while creating the Computer.",
       });
     });
 };
 
 exports.findAll = (req, res) => {
-  // #swagger.tags = ['event']
-  Event.findAll()
+  // #swagger.tags = ['computer']
+  Computer.findAll()
     .then((data) => {
       res.send(data);
     })
     .catch((err) => {
       res.status(500).send({
-        message: err.message || "Some error occurred while retrieving events.",
+        message: err.message || "Some error occurred while retrieving computers.",
       });
     });
 };
 
 exports.findOne = (req, res) => {
-  // #swagger.tags = ['event']
+  // #swagger.tags = ['computer']
   const id = req.params.id;
-  Event.findByPk(id)
+  Computer.findByPk(id)
     .then((data) => {
       if (data) {
         res.send(data);
       } else {
         res.status(500).send({
-          message: `Cannot find Event with id=${id}.`,
+          message: `Cannot find Computer with id=${id}.`,
         });
       }
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving Event with id=" + id,
+        message: "Error retrieving Computer with id=" + id,
       });
     });
 };
