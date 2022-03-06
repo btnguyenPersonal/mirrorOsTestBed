@@ -1,6 +1,6 @@
 import "./Dashboard.css";
 
-function Dashboard({ setPage }) {
+function Dashboard({ setPage, setID }) {
   const list = [
     {
       id: "1",
@@ -20,11 +20,12 @@ function Dashboard({ setPage }) {
   ];
 
   function onBtnClick(id,available){
-    console.log(id);
     if(available)
+    {
         setPage("Terminal");
-    else
-        return;
+        setID(id);
+    }
+    
   }
 
   let content = (
