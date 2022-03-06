@@ -48,7 +48,6 @@ function AdminDashboard({ setPage, setID }) {
             ],
             series: [occurrences]
           };
-          console.log(chartA);
           return chartA;
       }
     });
@@ -57,7 +56,6 @@ function AdminDashboard({ setPage, setID }) {
   let optionsA = {};
 
   function onBtnClick(id, available) {
-    console.log(id);
     if (available) {
       setPage("Terminal");
       setID(id);

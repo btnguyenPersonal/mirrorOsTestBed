@@ -8,7 +8,7 @@ import AdminDashboard from './dashboards/AdminDashboard';
 
 function App() {
   const [page, setPage] = useState("Login");
-  const [id, setID] = useState(0);
+  const [id, setID] = useState(-1);
 
   const commands = {
     user: "BrandonB",

@@ -31,7 +31,7 @@ function Login({ setPage }) {
           setPage("Dashboard");
         }
       } else {
-        console.log("Failure");
+        document.getElementById("fail_message").innerHTML = "<p><small>Login Failed</small></p> <p><small>Please Try again</small></p>";
       }
     });
   }
@@ -64,6 +64,7 @@ function Login({ setPage }) {
           Login
         </Button>
       </Form>
+      <div id="fail_message"></div>
     </div>
   );
 
