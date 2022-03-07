@@ -1,57 +1,39 @@
-const db = require("../models");
+const db = require("..");
 const bcrypt = require("bcrypt");
 const Password = db.password;
 const User = db.user;
 const Event = db.event;
 const utils = require("../config/utils.js");
 
-function isBodyValid(req, res) {
-  if (!req.body.password) {
-    res.status(412).send({
-      message: 'Requires a password: "password": <string>',
-    });
-    return false;
-  }
-  if (!req.body.authEmail) {
-    res.status(412).send({
-      message: 'Requires an email: "authEmail": <string>',
-    });
-    return false;
-  }
-  if (req.body.changeAdminPassword != 0 && req.body.changeAdminPassword != 1) {
-    res.status(412).send({
-      message: 'Requires which password you would like to change: "changeAdminPassword": <boolean>',
-    });
-    return false;
-  }
-  return true;
-}
-
 exports.create = async (req, res) => {
   // #swagger.tags = ['password']
-  if (!isBodyValid(req, res)) return;
+  if (
+    !utils.isBodyValid(req, res, {
+      password: "string",
+      authEmail: "string",
+      changeAdminPassword: "boolean",
+    })
+  ) {
+    return;
+  }
   User.findOne({
     where: {
-      email: req.body.authEmail
-    }
+      email: req.body.authEmail,
+    },
   }).then(async (data) => {
     if (data) {
       if (data.dataValues.isAdmin) {
         hashedPassword = await bcrypt.hash(req.body.password, 10);
         let sqlPassword = await Password.findOne({
           where: {
-            isAdminPassword: req.body.changeAdminPassword
+            isAdminPassword: req.body.changeAdminPassword,
           },
-          order: [
-            ["createdAt", "DESC"]
-          ],
+          order: [["createdAt", "DESC"]],
         });
         sqlPassword.password = hashedPassword;
         await sqlPassword.save();
         await Event.create({
-          eventTypeId: req.body.changeAdminPassword ?
-            utils.CHANGED_ADMIN_PASSWORD_EVENT_ID :
-            utils.CHANGED_PASSWORD_EVENT_ID,
+          eventTypeId: req.body.changeAdminPassword ? utils.CHANGED_ADMIN_PASSWORD_EVENT_ID : utils.CHANGED_PASSWORD_EVENT_ID,
           userId: data.dataValues.userId,
         });
         res.status(200).send({

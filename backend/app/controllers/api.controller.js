@@ -1,6 +1,8 @@
-const db = require("../models");
+const db = require("..");
 const Event = db.event;
 const Password = db.password;
+const Session = db.session;
+const Computer = db.computer;
 const User = db.user;
 const bcrypt = require("bcrypt");
 const utils = require("../config/utils.js");
@@ -10,13 +12,13 @@ const exec = require("await-exec");
 
 const NUMBER_OF_PORTS = 7;
 
-exports.restart = async (req, res) => {
+exports.rebootPort = async (req, res) => {
   /*
     #swagger.tags = ['api']
     #swagger.description = 'Restarts the PoE for a specific port by calling a script on the backend.'
     #swagger.parameters['id'] = { 
       in: 'path',
-      description: 'The port id to restart. Must be in the range [1,7].' ,
+      description: 'The port id to restart.' ,
       type: 'integer'
     }
     #swagger.responses[200] = { description: 'Sent when the command was executed successfully.' }
@@ -87,23 +89,18 @@ exports.login = async (req, res) => {
     #swagger.responses[401] = { description: 'Sent when the password was incorrect.' }
     #swagger.responses[412] = { description: 'Sent when something is wrong with your request\'s json object.' }
   */
-  if (!req.body.email) {
-    res.status(412).send({
-      message: 'Requires an email: "email": <string>',
-    });
+  if (
+    !utils.isBodyValid(req, res, {
+      email: "string",
+      password: "string",
+    })
+  ) {
     return;
   }
-  if (!req.body.password) {
-    res.status(412).send({
-      message: 'Requires a password: "password": <string>',
-    });
-    return;
-  }
-
   let passwords = await Promise.all([
     Password.findOne({
       where: {
-        isAdminPassword: 0
+        isAdminPassword: 0,
       },
       order: [
         ["createdAt", "DESC"]
@@ -111,7 +108,7 @@ exports.login = async (req, res) => {
     }),
     Password.findOne({
       where: {
-        isAdminPassword: 1
+        isAdminPassword: 1,
       },
       order: [
         ["createdAt", "DESC"]
@@ -132,7 +129,7 @@ exports.login = async (req, res) => {
   let isNewUser = false;
   let foundUser = await User.findOne({
     where: {
-      email: req.body.email
+      email: req.body.email,
     },
   }).then((foundUser) => {
     return foundUser;
@@ -140,7 +137,7 @@ exports.login = async (req, res) => {
   if (!foundUser) {
     isNewUser = true;
     foundUser = await User.create({
-      email: req.body.email
+      email: req.body.email,
     }).then((user) => {
       return user;
     });
@@ -174,4 +171,179 @@ exports.login = async (req, res) => {
     });
   }
   return;
+};
+
+exports.useComputer = async (req, res) => {
+  // #swagger.tags = ['api']
+
+  /*
+
+    #swagger.description = 'Use this to use a computer. i.e., Call when a user is attempting to user a pi\'s terminal. Send the user ID who is requesting the computer, and the computer ID they want (not the port ID)'
+  
+    #swagger.parameters['body'] = { 
+      in: 'body',
+      schema: {
+        userId: 1,
+        computerId: 2
+      },
+      description: ''
+    }
+
+    #swagger.responses[200] = { description: 'Sent when the computer is put in use.' }
+    #swagger.responses[412] = { description: 'Sent when something is wrong with your request\'s json object.' }
+    #swagger.responses[500] = { description: 'Sent when something went wrong with the backend outside of frontend\'s control.' }
+  */
+
+
+  //Need to setup websockets, start the connection.
+  if (
+    !utils.isBodyValid(req, res, {
+      userId: "integer",
+      computerId: "integer",
+    })
+  ) {
+    return;
+  }
+  const userId = req.body.userId;
+  const computerId = req.body.computerId;
+  //Check if computer is in use.
+  let computer = await Computer.findByPk(computerId)
+    .then((computer) => {
+      if (computer) {
+        return computer;
+      } else {
+        res.status(500).send({
+          message: `Cannot find Computer with id=${computerId}.`,
+        });
+        return;
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Error retrieving Computer with id=" + computerId,
+      });
+      return;
+    });
+  if (computer.inUse) {
+    res.status(500).send({
+      message: "Computer with id=" + computerId + " is in use.",
+    });
+    return;
+  }
+  //Check if they already have a computer.
+  let session = await Session.findOne({
+    where: {
+      userId: userId,
+      endTime: null,
+    },
+    order: [
+      ["startTime", "DESC"]
+    ],
+  }).then((session) => {
+    return session;
+  });
+  if (session) {
+    res.status(500).send({
+      message: `User has an open session with computerId: ${session.computerId}. Users can only have 1 computer at a time.`,
+    });
+    return;
+  }
+  computer.inUse = true;
+  await computer.save();
+
+  let newSession = await Session.create({
+    userId: userId,
+    computerId: computerId,
+    startTime: Date.now(),
+  });
+  await Event.create({
+    eventTypeId: utils.SESSION_START_EVENT_ID,
+    userId: userId,
+    newSession,
+  });
+  res.status(200).send({
+    message: `Success! You are now in control of id=${computerId}`,
+  });
+};
+
+exports.releaseComputer = async (req, res) => {
+  // #swagger.tags = ['api']
+
+  /*
+
+    #swagger.description = 'Use this to release a computer. i.e., A user\'s session with the terminal has ended.'
+  
+    #swagger.parameters['body'] = { 
+      in: 'body',
+      schema: {
+        userId: 1,
+        computerId: 2
+      },
+      description: ''
+    }
+
+    #swagger.responses[200] = { description: 'Sent when the computer is released.' }
+    #swagger.responses[412] = { description: 'Sent when something is wrong with your request\'s json object.' }
+    #swagger.responses[500] = { description: 'Sent when something went wrong with the backend outside of frontend\'s control.' }
+  */
+
+  //Need to setup websockets, end the connection.
+  if (
+    !utils.isBodyValid(req, res, {
+      userId: "integer",
+      computerId: "integer",
+    })
+  ) {
+    return;
+  }
+  const userId = req.body.userId;
+  const computerId = req.body.computerId;
+  let computer = await Computer.findByPk(computerId)
+    .then((computer) => {
+      if (computer) {
+        return computer;
+      } else {
+        res.status(500).send({
+          message: `Cannot find Computer with id=${computerId}.`,
+        });
+        return;
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Error retrieving Computer with id=" + computerId,
+      });
+      return;
+    });
+  if (!computer.inUse) {
+    res.status(200).send({
+      message: "Computer with id=" + computerId + " is not in use.",
+    });
+    return;
+  }
+  let session = await Session.findOne({
+    where: {
+      userId: userId,
+      endTime: null,
+    },
+    order: [
+      ["startTime", "DESC"]
+    ],
+  }).then((session) => {
+    return session;
+  });
+  //If a session didn't exist then release the computer anyways. Hopefully shouldn't happen if we manage the socket properly.
+  if (session) {
+    session.endTime = Date.now();
+    await session.save();
+  }
+  await Event.create({
+    eventTypeId: utils.SESSION_END_EVENT_ID,
+    userId: userId,
+  });
+  computer.inUse = false;
+  await computer.save();
+  res.status(200).send({
+    message: `Success! Computer id=${computerId} has been released.`,
+  });
 };
