@@ -19,7 +19,7 @@ function Login({ setPage }) {
   function sendCredentials(email,password)
   {
     const login = { email, password};
-    fetch("http://localhost:8080/api/login", {
+    fetch(`http://${process.env.REACT_APP_IP}:8080/api/login`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(login)
