@@ -48,7 +48,7 @@ frontend `.env`:
 
 ```
 # ostestbed/frontend/.env
-IP="localhost"
+REACT_APP_IP="localhost"
 ```
 
 ## Running
