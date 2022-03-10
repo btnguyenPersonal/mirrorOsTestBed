@@ -3,6 +3,8 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
 
+const webSocket = require('ws');
+
 const swaggerUi = require("swagger-ui-express");
 const swaggerFile = require("./app/config/swagger_output.json");
 
@@ -14,6 +16,9 @@ var corsOptions = {
 const db = require("./app");
 
 initializeDb();
+
+// create websocket server
+const wsServer = webSocket.Server({ port: 9000 });
 
 app.use(cors(corsOptions));
 // parse requests of content-type - application/json
@@ -38,6 +43,14 @@ app.listen(PORT, () => {
 });
 
 app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
+
+// create websocket connection
+wsServer.on('connection', ws => {
+	ws.on('message', message => {
+		ws.send('Message received : ${message}');
+	});
+	ws.send('Successful connection');
+});
 
 async function initializeDb() {
   const EventType = db.eventType;
