@@ -18,7 +18,7 @@ const db = require("./app");
 initializeDb();
 
 // create websocket server
-const wsServer = webSocket.Server({ port: 9000 });
+const wsServer = new webSocket.Server({ port: 9000 });
 
 app.use(cors(corsOptions));
 // parse requests of content-type - application/json
