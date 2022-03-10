@@ -27,14 +27,6 @@
     {
       "name": "password",
       "description": "endpoints related to passwords."
-    },
-    {
-      "name": "computer",
-      "description": "endpoints related to computers."
-    },
-    {
-      "name": "session",
-      "description": "endpoints related to sessions."
     }
   ],
   "schemes": [
@@ -753,52 +745,6 @@
         "eventType": {
           "type": "string",
           "example": "some event"
-        }
-      }
-    },
-    "Computer": {
-      "type": "object",
-      "properties": {
-        "computerId": {
-          "type": "string",
-          "example": "integer - the computer ID, autoincremented."
-        },
-        "portId": {
-          "type": "string",
-          "example": "integer - the port ID this computer is plugged into on the switch."
-        },
-        "model": {
-          "type": "string",
-          "example": "string - the model of the machine"
-        },
-        "inUse": {
-          "type": "string",
-          "example": "boolean - if machine is in use."
-        }
-      }
-    },
-    "Session": {
-      "type": "object",
-      "properties": {
-        "sessionId": {
-          "type": "string",
-          "example": "integer - the session ID, autoincremented."
-        },
-        "userId": {
-          "type": "string",
-          "example": "integer - the ID of the user who owns this session."
-        },
-        "computerId": {
-          "type": "string",
-          "example": "integer - the ID of the computer for this session."
-        },
-        "startTime": {
-          "type": "string",
-          "example": "datetime - the time this session started."
-        },
-        "endTime": {
-          "type": "string",
-          "example": "datetime - the time this session ended (or null if still live)."
         }
       }
     }
