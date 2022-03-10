@@ -4,36 +4,26 @@ const swaggerAutogen = require('swagger-autogen')()
 
 const outputFile = "./app/config/swagger_output.json";
 const endpointsFiles = [
-  "./app/routes/api.routes.js",
-  "./app/routes/event.routes.js",
-  "./app/routes/eventType.routes.js",
-  "./app/routes/password.routes.js",
-  "./app/routes/user.routes.js",
-  "./app/routes/computer.routes.js",
-  "./app/routes/session.routes.js",
+    "./app/routes/api.routes.js",
+    "./app/routes/event.routes.js",
+    "./app/routes/eventType.routes.js",
+    "./app/routes/password.routes.js",
+    "./app/routes/user.routes.js",
+    "./app/routes/computer.routes.js",
+    "./app/routes/session.routes.js",
 ];
 
 const doc = {
-  info: {
-    version: "1.0.0",
-    title: "OSTestBed API",
-    description: "OSTestBed API",
-  },
-  host: "localhost:8080",
-  basePath: "/",
-  schemes: ["http", "https"],
-  consumes: ["application/json"],
-  produces: ["application/json"],
-  tags: [
-    {
-      name: "api",
-      description: "general endpoints not associated with an entity (endpoints you care about).",
+    info: {
+        version: "1.0.0",
+        title: "OSTestBed API",
+        description: "OSTestBed API",
     },
     host: `${process.env.IP}:8080`,
     basePath: "/",
-    schemes: ['http', 'https'],
-    consumes: ['application/json'],
-    produces: ['application/json'],
+    schemes: ["http", "https"],
+    consumes: ["application/json"],
+    produces: ["application/json"],
     tags: [{
         "name": "api",
         "description": "general endpoints not associated with an entity (endpoints you care about)."
