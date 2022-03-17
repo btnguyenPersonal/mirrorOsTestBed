@@ -65,6 +65,7 @@ function Login({ setPage }) {
           Login
         </Button>
       </Form>
+      <a href = "Terminal.html"> Terminal placeholder link for now</a>
       <div id="fail_message"></div>
     </div>
   );
