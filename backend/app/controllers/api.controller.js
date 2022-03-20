@@ -68,7 +68,7 @@ exports.fileUpload = async (req, res) => {
 	if(typeof req.file === 'undefined')
 		return res.status(400).send({ message: 'No file sent' });
 	
-	//call shell script
+	//call shell scripts
 	
 	res.status(200).send({ message: 'Successful file upload' });
 };
