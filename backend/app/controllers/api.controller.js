@@ -56,6 +56,23 @@ exports.rebootPort = async (req, res) => {
     });
 };
 
+exports.fileUpload = async (req, res) => {
+	const id = req.params.id;
+	if (id < 1 || id > NUMBER_OF_PORTS) {
+		res.status(400).send({
+			message: 'The port id must be between 1-${NUMBER_OF_PORTS} inclusive.'
+		});
+		return;
+	}
+	
+	if(typeof req.file === 'undefined')
+		return res.status(400).send({ message: 'No file sent' });
+	
+	//call shell script
+	
+	res.status(200).send({ message: 'Successful file upload' });
+};
+
 exports.login = async (req, res) => {
   /*
     #swagger.tags = ['api']
