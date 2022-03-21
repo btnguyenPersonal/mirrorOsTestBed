@@ -1,7 +1,11 @@
 const multer = require('multer');
+const mkdirp = require('mkdirp');
 
 exports.uploader = (req, res, next) => {
 	var id = req.params.id;
+	
+	//create required directory
+	mkdirp.sync('./app/upload/files/' + id);
 	
 	//storage details - path and file name
 	var storage = multer.diskStorage({
@@ -9,7 +13,7 @@ exports.uploader = (req, res, next) => {
 			cb(null, './app/upload/files/' + id + '/');
 		},
 		filename: function(req, file, cb) {
-			cb(null, file.originalname);
+			cb(null, 'kernel.img');
 		}
 	});
 	
