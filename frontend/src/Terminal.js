@@ -4,6 +4,7 @@ import React, { useState } from "react";
 function Terminal({ setPage, commands, id }) {
   const [selectedFile, setSelectedFile] = useState();
   const [isFilePicked, setIsFilePicked] = useState(false);
+  const [fileUploaded, setFileUploaded] = useState(false);
 
   const changeHandler = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -13,23 +14,32 @@ function Terminal({ setPage, commands, id }) {
   const handleSubmission = () => {
     const formData = new FormData();
 
-    formData.append("File", selectedFile);
+    formData.append("imgFile", selectedFile);
 
-    fetch(`http://${process.env.REACT_APP_IP}:8080/api/upload/:${id}`, {
+    fetch(`http://${process.env.REACT_APP_IP}:8080/api/upload/${id}`, {
       method: "POST",
       body: formData,
     })
       .then((response) => response.json())
       .then((result) => {
-        console.log("Success:", result);
+        //console.log("Success:", result);
+        setFileUploaded(true);
+        if(result.status!=200){
+          document.getElementById("fileStatus").innerHTML="<p>"+result.message+"</p>";
+        }else{
+          document.getElementById("fileStatus").innerHTML="<p>"+result.message+"</p>";
+        }
       })
       .catch((error) => {
-        console.error("Error:", error);
+        //console.error("Error:", error);
+        setFileUploaded(true);
+        document.getElementById("fileStatus").innerHTML="<p>"+error+"</p>";
       });
   };
 
-  let content = (
-    <div>
+  const Upload = () => {
+    return (
+      <div>
       <input type="file" name="file" onChange={changeHandler} />
       {isFilePicked ? (
         <div>
@@ -49,6 +59,13 @@ function Terminal({ setPage, commands, id }) {
       <div>
         <button onClick={handleSubmission}>Submit</button>
       </div>
+      </div>
+    );
+  }
+
+  let content = (
+    <div>
+      {fileUploaded ? <div id="fileStatus"></div> : <Upload />}
       <ReactTerminal commands={commands} />
     </div>
   );
