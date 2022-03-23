@@ -23,7 +23,7 @@ function Terminal({ setPage, commands, id }) {
       .then((response) => response.json())
       .then((result) => {
         //console.log("Success:", result);
-        if (result.message != "Successful file upload") {
+        if (result.message !== "Successful file upload") {
           document.getElementById("errorStatus").innerHTML =
             "<p>" + result.message + "</p>";
         } else {
