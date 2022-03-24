@@ -46,7 +46,7 @@ function Login({ setPage }) {
           <Form.Control
             autoFocus
             className="input_field"
-            pattern=".+@iastate\.edu"
+            pattern=".+@iastate.edu"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
