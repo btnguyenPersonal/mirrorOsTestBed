@@ -6,6 +6,7 @@ function Dashboard({ setPage, setID }) {
   const [loaded, setLoaded] = useState(false);
 
   const loadData = async () => {
+    setLoaded(false);
     const res = await fetch(
       `http://${process.env.REACT_APP_IP}:8080/api/computer`
     );
@@ -13,8 +14,10 @@ function Dashboard({ setPage, setID }) {
   };
 
   useEffect(() => {
-    loadData();
-    return () => {};
+    const interval = setInterval(() => {
+      loadData();
+    }, 100000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -24,14 +27,20 @@ function Dashboard({ setPage, setID }) {
 
   function onBtnClick(id, available) {
     if (available) {
-      setPage("Terminal");
       setID(id);
+      let comp = {userId: 1,id};
+      fetch(`http://${process.env.REACT_APP_IP}:8080/api/useComputer`,{method: "POST",body: comp})
+      setPage("Terminal");
     }
   }
 
   let content = (
     <nav>
-      <div className="Header">Welcome</div>
+      <div className="Header" style={{display: 'flex', justifyContent: 'space-between'}}>
+        <button onClick={() => loadData()}>Refresh Page</button>
+        <div >Welcome</div>
+        <div>OS Pi Testbed</div>
+      </div>
       {loaded ? (
         <ul>
           {list.map((item) => (
