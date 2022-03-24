@@ -72,7 +72,21 @@ function Terminal({ setPage, commands, id }) {
       {fileUploaded ? (
         <div>
           <div id="fileStatus"></div> <br />{" "}
-          <button onClick={() => setFileUploaded(false)}>Submit new File</button>{" "}
+          <button onClick={() => setFileUploaded(false)}>
+            Submit new File
+          </button>{" "}
+          <button
+            onClick={() =>
+              fetch(
+                `http://${process.env.REACT_APP_IP}:8080/api/reboot/${id}`,
+                {
+                  method: "POST",
+                }
+              )
+            }
+          >
+            Reset Pi
+          </button>
         </div>
       ) : (
         <Upload />
