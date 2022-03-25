@@ -4,7 +4,7 @@ const db = require("..");
 const Computer = db.computer;
 
 exports.uploader = async (req, res, next) => {
-	var id = req.params.id;
+	var computerId = req.params.id;
 	let theComputer = await Computer.findByPk(computerId);
 	if(!theComputer) {
 	  res.status(400).send({
