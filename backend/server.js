@@ -44,8 +44,29 @@ app.listen(PORT, () => {
 
 app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
+var {SerialPort, ReadlineParser} = require("serialport");
+var serialPort = new SerialPort ({
+  path: "/dev/ttyUSB0",
+  baudRate: 115200
+});
+
 // create websocket connection
 wsServer.on('connection', ws => {
+  var parser = new ReadlineParser();
+  serialPort.pipe(parser);
+  parser.on('data', function(data) {
+      console.log(data);
+      ws.send(data);
+  });
+  
+  /*
+  serialPort.on("open", function () {
+    console.log('open');
+    parser.on('data', function(data) {
+        console.log(data);
+      ws.send(data);
+    });
+  });*/
 	ws.on('message', message => {
 		ws.send('Message received : ' + message);
 	});
