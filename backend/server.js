@@ -72,11 +72,11 @@ async function initializeDb() {
     hashedPassword = await bcrypt.hash("adminpassword", 10);
     await Password.create({ password: hashedPassword, isAdminPassword: 1 });
     //Computer stuff. inUse is false by default.
-    await Computer.create({ portId: 2, model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 3, model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 4, model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 5, model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 6, model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 7, model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 2, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 3, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 4, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 5, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 6, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 7, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
   });
 }

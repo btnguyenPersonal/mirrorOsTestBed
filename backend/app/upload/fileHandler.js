@@ -1,19 +1,27 @@
 const multer = require('multer');
 const mkdirp = require('mkdirp');
 
-exports.uploader = (req, res, next) => {
+exports.uploader = async (req, res, next) => {
 	var id = req.params.id;
+	let theComputer = await Computer.findByPk(computerId);
+	if(!theComputer) {
+	  res.status(400).send({
+		message: "Computer ID: " + computerId + " doesnt exist.",
+	  });
+	  return;
+	}
+	const serialNumber = theComputer.serialNumber;
 	
 	//create required directory
-	mkdirp.sync('./app/upload/files/' + id);
+	mkdirp.sync('/srv/tftp/' + serialNumber);
 	
 	//storage details - path and file name
 	var storage = multer.diskStorage({
 		destination: function(req, file, cb) {
-			cb(null, './app/upload/files/' + id + '/');
+			cb(null, '/srv/tftp/' + serialNumber + '/');
 		},
 		filename: function(req, file, cb) {
-			cb(null, 'kernel.img');
+			cb(null, 'kernel7.img');
 		}
 	});
 	

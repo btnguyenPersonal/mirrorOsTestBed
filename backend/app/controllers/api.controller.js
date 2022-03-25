@@ -12,7 +12,7 @@ const exec = require("await-exec");
 
 const NUMBER_OF_PORTS = 7;
 
-exports.rebootPort = async (req, res) => {
+exports.reboot = async (req, res) => {
   /*
     #swagger.tags = ['api']
     #swagger.description = 'Restarts the PoE for a specific port by calling a script on the backend.'
@@ -25,15 +25,18 @@ exports.rebootPort = async (req, res) => {
     #swagger.responses[400] = { description: 'Sent when something is wrong with your request that is within frontend\'s control.' }
     #swagger.responses[500] = { description: 'Sent when something went wrong with the backend outside of frontend\'s control.' }
   */
-  const id = req.params.id;
-  if (id < 1 || id > NUMBER_OF_PORTS) {
+	const computerId = req.params.id;
+  let theComputer = await Computer.findByPk(computerId);
+  if(!theComputer) {
     res.status(400).send({
-      message: `The port id must be between 1-${NUMBER_OF_PORTS} inclusive.`,
+      message: "Computer ID: " + computerId + " doesnt exist.",
     });
     return;
   }
+  const portId = theComputer.portId;
+
   //This code will eventually be moved into a "runCommand" function.
-  let command = ` ./reboot.sh ${id}`;
+  let command = ` ./reboot.sh ${portId}`;
   if (process.env.OS.includes("Windows")) {
     command = "cd"; //Windows can't run our command without Windows Subsystem for Linux (WSL) and I can't install it lol.
   }
@@ -57,18 +60,18 @@ exports.rebootPort = async (req, res) => {
 };
 
 exports.fileUpload = async (req, res) => {
-	const id = req.params.id;
-	if (id < 1 || id > NUMBER_OF_PORTS) {
-		res.status(400).send({
-			message: 'The port id must be between 1-${NUMBER_OF_PORTS} inclusive.'
-		});
-		return;
-	}
+	const computerId = req.params.id;
+  let theComputer = await Computer.findByPk(computerId);
+  if(!theComputer) {
+    res.status(400).send({
+      message: "Computer ID: " + computerId + " doesnt exist.",
+    });
+    return;
+  }
+  const portId = theComputer.portId;
 	
 	if(typeof req.file === 'undefined')
 		return res.status(400).send({ message: 'No file sent' });
-	
-	//call shell scripts
 	
 	res.status(200).send({ message: 'Successful file upload' });
 };
