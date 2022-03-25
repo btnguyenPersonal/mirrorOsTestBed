@@ -1,5 +1,7 @@
 const multer = require('multer');
 const mkdirp = require('mkdirp');
+const db = require("..");
+const Computer = db.computer;
 
 exports.uploader = async (req, res, next) => {
 	var id = req.params.id;
