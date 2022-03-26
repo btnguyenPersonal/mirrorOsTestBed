@@ -5,7 +5,7 @@
     "title": "OSTestBed API",
     "description": "OSTestBed API"
   },
-  "host": "localhost:8080",
+  "host": "undefined:8080",
   "basePath": "/",
   "tags": [
     {
@@ -21,12 +21,20 @@
       "description": "endpoints related to events."
     },
     {
-      "name": "event_type",
-      "description": "endpoints related to event_types."
+      "name": "eventType",
+      "description": "endpoints related to event types."
     },
     {
       "name": "password",
       "description": "endpoints related to passwords."
+    },
+    {
+      "name": "computer",
+      "description": "endpoints related to computers."
+    },
+    {
+      "name": "session",
+      "description": "endpoints related to sessions."
     }
   ],
   "schemes": [
@@ -129,22 +137,22 @@
         "tags": [
           "api"
         ],
-        "description": "Restarts the PoE for a specific port by calling a script on the backend.",
+        "description": "Reboots the PoE for a specific computer by calling a script on the backend.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "integer",
-            "description": "The port id to restart."
+            "description": "The computer id to reboot."
           }
         ],
         "responses": {
           "200": {
             "description": "Sent when the command was executed successfully."
           },
-          "400": {
-            "description": "Sent when something is wrong with your request that is within frontend's control."
+          "412": {
+            "description": "Sent when the computer ID specified does not exist."
           },
           "500": {
             "description": "Sent when something went wrong with the backend outside of frontend's control."
@@ -154,24 +162,31 @@
     },
     "/api/upload/{id}": {
       "post": {
-        "description": "",
+        "tags": [
+          "api"
+        ],
+        "description": "Takes an uploaded kernel and stores it on the backend in the folder specific to the computer being used.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer",
+            "description": "The computer id the kernel belongs to."
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Sent when the file was uploaded successfully."
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Sent when a file was not sent in the request"
+          },
+          "412": {
+            "description": "Sent when the computer ID specified does not exist."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Sent when something went wrong with the backend outside of frontend's control."
           }
         }
       }
@@ -329,7 +344,7 @@
     "/api/eventTypes/": {
       "post": {
         "tags": [
-          "event_type"
+          "eventType"
         ],
         "description": "",
         "parameters": [
@@ -360,7 +375,7 @@
       },
       "get": {
         "tags": [
-          "event_type"
+          "eventType"
         ],
         "description": "",
         "parameters": [],
@@ -377,7 +392,7 @@
     "/api/eventTypes/{id}": {
       "get": {
         "tags": [
-          "event_type"
+          "eventType"
         ],
         "description": "",
         "parameters": [
@@ -769,6 +784,56 @@
         "eventType": {
           "type": "string",
           "example": "some event"
+        }
+      }
+    },
+    "Computer": {
+      "type": "object",
+      "properties": {
+        "computerId": {
+          "type": "number",
+          "example": 1
+        },
+        "portId": {
+          "type": "number",
+          "example": 2
+        },
+        "serialNumber": {
+          "type": "string",
+          "example": "some serial number"
+        },
+        "model": {
+          "type": "string",
+          "example": "3B+"
+        },
+        "inUse": {
+          "type": "boolean",
+          "example": true
+        }
+      }
+    },
+    "Session": {
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "number",
+          "example": 12
+        },
+        "userId": {
+          "type": "number",
+          "example": 1
+        },
+        "computerId": {
+          "type": "number",
+          "example": 1
+        },
+        "startTime": {
+          "type": "string",
+          "example": "the time the session started"
+        },
+        "endTime": {
+          "type": "string",
+          "example": "the time the session ended"
         }
       }
     }
