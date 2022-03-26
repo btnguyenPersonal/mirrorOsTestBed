@@ -1,5 +1,4 @@
 const multer = require('multer');
-const mkdirp = require('mkdirp');
 const db = require("..");
 const Computer = db.computer;
 
@@ -13,9 +12,6 @@ exports.uploader = async (req, res, next) => {
 	  return;
 	}
 	const serialNumber = theComputer.serialNumber;
-	
-	//create required directory
-	mkdirp.sync('/srv/tftp/' + serialNumber);
 	
 	//storage details - path and file name
 	var storage = multer.diskStorage({
