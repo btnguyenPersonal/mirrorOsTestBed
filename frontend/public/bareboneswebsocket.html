@@ -1,15 +1,125 @@
 <body>
     <script>
-        const ws = new WebSocket("ws://192.168.1.136:9000");
-        const msg = "frontend WebSocket is now open"
+        var ws, computerId, userId; 
+        async function connectWebSocket() {
+            //If ws already exists, then don't reconnect.
+            if(ws) return;
+            //Check if the page has computer and user id.
+            if(!isComputerIdAndUserIdPresent()) {
+                return;
+            }
+            //This data variable should grab the data stored in react state.
+            let data = {userId: userId, computerId: computerId};
+            let res = await fetch(`http://localhost:8080/api/useComputer`, { 
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data),
+            }).then(async (response) => {
+                let json = await response.json();
+                response.json = json;
+                return response;
+            });
+            printToOutput(res.json.message);
+            //If an error occured, it was already printed, so just exit.
+            if(res.status != 200) return;
+            //Create websocket. Change localhost to be smarter using .env file.
+            ws = new WebSocket("ws://localhost:9000");
 
-        ws.addEventListener("open", () => {
-            console.log("connected to server");
-            ws.send(msg);
-        });
+            ws.onopen = () => {
+                ws.send("websocket-initialization-message:" + computerId);
+                printToOutput("Connected to backend server.");
+            };
 
-        ws.onmessage = (event) => {
-            console.log(event.data);
+            ws.onmessage = (messageFromBackend) => {
+                printToOutput(messageFromBackend.data);
+            };
+
+            ws.onclose = (e) => {
+                printToOutput("Websocket closed.");
+            }
+        }
+
+        function sendMessage() {
+            var output = document.getElementById('output');
+            var arr = output.value.split("\n");
+            var msg = arr[arr.length-1];
+            //Check if there is a message to send.
+            if(msg != "") {
+                output.value += "\n";
+                console.log("You sent: '" + msg + "'");
+                ws.send(msg);
+            }
+        }
+
+        async function closeWebsocket() {
+            //Close session and release computer
+            let data = {userId: userId, computerId: computerId};
+            let res = await fetch(`http://localhost:8080/api/releaseComputer`, { 
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data),
+            }).then(async (response) => {
+                let json = await response.json();
+                response.json = json;
+                return response;
+            });
+            //Can make this output smarter.
+            printToOutput(res.json.message);
+            //Close websocket.
+            ws.close();
+            ws = null;
+        }
+
+        //This is so when they exit out, websocket/session still closes and computer is released.
+        window.onbeforeunload = async function() {
+            ws.onclose = function () {}; // disable onclose handler first
+            await closeWebsocket();
         };
+
+        function isComputerIdAndUserIdPresent() {
+            computerId = document.getElementById('compid').value;
+            if(!computerId) {
+                printToOutput("Invalid computer ID")
+                return false;
+            }
+            userId = document.getElementById('userid').value;
+            if(!userId) {
+                printToOutput("Invalid user ID")
+                return false;
+            }
+            return true;
+        }
+
+        function printToOutput(someText) {
+            var output = document.getElementById('output');
+            output.value = output.value + someText + "\n";
+        }
+
+        function clearOutput() {
+            document.getElementById('output').value = "";
+        }
+
     </script>
+    <label for="compid">Computer ID:</label><br>
+    <input type="text" id="compid" name="compid"><br>
+    <label for="userid">User ID:</label><br>
+    <input type="text" id="userid" name="userid"><br>
+    <br>
+    <button onclick="connectWebSocket()">Connect websocket</button>
+    <br>
+    <br>
+    <label for="output">Output:</label><br>
+    <textarea id="output" name="output" cols="100" rows="20"></textarea>
+    <br>
+    <button onclick="sendMessage()">Send last row of text</button>
+    <br>
+    <br>
+    <button onclick="closeWebsocket()">Close websocket</button>
+    <br>
+    <br>
+    <button onclick="clearOutput()">Clear output</button>
 </body>

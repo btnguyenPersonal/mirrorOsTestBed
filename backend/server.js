@@ -3,7 +3,7 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
 
-const webSocket = require('ws');
+const webSocket = require("ws");
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerFile = require("./app/config/swagger_output.json");
@@ -44,35 +44,6 @@ app.listen(PORT, () => {
 
 app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-var {SerialPort, ReadlineParser} = require("serialport");
-var serialPort = new SerialPort ({
-  path: "/dev/ttyUSB0",
-  baudRate: 115200
-});
-
-// create websocket connection
-wsServer.on('connection', ws => {
-  var parser = new ReadlineParser();
-  serialPort.pipe(parser);
-  parser.on('data', function(data) {
-      console.log(data);
-      ws.send(data);
-  });
-
-  /*
-  serialPort.on("open", function () {
-    console.log('open');
-    parser.on('data', function(data) {
-        console.log(data);
-      ws.send(data);
-    });
-  });*/
-	ws.on('message', message => {
-		ws.send('Message received : ' + message);
-	});
-	ws.send('Successful connection');
-});
-
 async function initializeDb() {
   const EventType = db.eventType;
   const Password = db.password;
@@ -93,11 +64,57 @@ async function initializeDb() {
     hashedPassword = await bcrypt.hash("adminpassword", 10);
     await Password.create({ password: hashedPassword, isAdminPassword: 1 });
     //Computer stuff. inUse is false by default.
-    await Computer.create({ portId: 2, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 3, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 4, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 5, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 6, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 7, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 2, serialNumber: "e2f2ecf5", model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 3, serialNumber: "e2f2ecf5", model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 4, serialNumber: "e2f2ecf5", model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 5, serialNumber: "e2f2ecf5", model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 6, serialNumber: "e2f2ecf5", model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 7, serialNumber: "e2f2ecf5", model: "Raspberry Pi 3 Model B+" });
   });
+}
+
+// create websocket connection
+var computerIdToWebsocketDict = {};
+
+var { SerialPort, ReadlineParser } = require("serialport");
+var serialPort = new SerialPort({
+  path: "/dev/ttyUSB0",
+  baudRate: 115200,
+});
+
+wsServer.on("connection", (ws) => {
+  var parser = new ReadlineParser();
+  serialPort.pipe(parser);
+  parser.on("data", function (data) {
+    console.log("data from serial: " + data);
+    ws.send(data);
+  });
+
+  ws.on("message", (message) => {
+    message = message.toString();
+    if (message.includes("websocket-initialization-message:")) {
+      var computerId = message.split(":")[1];
+      if (computerIdToWebsocketDict[computerId]) return;
+      computerIdToWebsocketDict[computerId] = ws.computerId;
+    }
+    console.log("Message received from frontend: " + message);
+    ws.send("Message received on backend: " + message);
+  });
+
+  ws.on("close", () => {
+    var computerId = ws.computerId;
+    delete computerIdToWebsocketDict[computerId];
+    console.log("websocket closed from frontend.");
+  });
+});
+
+//The following is to simulate data coming from serial stuff.
+setInterval(() => {
+  simulateComputersReceivingData();
+}, 3000);
+function simulateComputersReceivingData() {
+  for (var computerId in computerIdToWebsocketDict) {
+    let ws = computerIdToWebsocketDict[computerId];
+    ws.send("faking some serial data every 3 seconds. This data is only being sent to computerId=" + computerId);
+  }
 }
