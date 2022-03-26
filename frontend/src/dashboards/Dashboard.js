@@ -22,7 +22,7 @@ function Dashboard({ setPage, setID }) {
   function onBtnClick(id,available){
     if(available)
     {
-        setPage("Terminal");
+        setPage("TerminalPage");
         setID(id);
     }
     
