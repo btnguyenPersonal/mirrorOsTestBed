@@ -1,4 +1,4 @@
-import Terminal from './components/Terminal'
+import Terminal from './terminalComponents/Terminal'
 import React, { useState } from "react";
 
 function TerminalPage({ setPage, id }) {
