@@ -51,9 +51,14 @@ function AdminDashboard({ setPage, setID, userId }) {
           },
           body: JSON.stringify(comp)
         }
-      )
-
-      setPage("Terminal");
+      ).then(async (response) => {
+        let json = await response.json();
+        if (response.status === 200) {
+          setPage("Terminal");
+        } else {
+          document.getElementById("fail_message").innerHTML = "<p><small>"+json.message+"</small></p>";
+        }
+      });
     }
   }
 
@@ -89,6 +94,7 @@ function AdminDashboard({ setPage, setID, userId }) {
         {!graph && <Button onClick={() => setGraph(true)}>Use Graph</Button>}
         {graph && <Chartist data={chartA} options={optionsA} type={"Bar"} />}
       </div>
+      <div id="fail_message"></div>
       {loaded ? (
         <ul>
           {list.map((item) => (
