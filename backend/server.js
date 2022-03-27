@@ -49,28 +49,21 @@ var serialPort = new SerialPort ({
   path: "/dev/ttyUSB0",
   baudRate: 115200
 });
+var parser = new ReadlineParser();
+serialPort.pipe(parser);
 
 // create websocket connection
 wsServer.on('connection', ws => {
-  var parser = new ReadlineParser();
-  serialPort.pipe(parser);
+  // send serial data through websocket
   parser.on('data', function(data) {
-      console.log(data);
-      ws.send(data);
+    console.log(data);
+    ws.send(data);
   });
 
-  /*
-  serialPort.on("open", function () {
-    console.log('open');
-    parser.on('data', function(data) {
-        console.log(data);
-      ws.send(data);
-    });
-  });*/
+  // send websocket message through serial port
 	ws.on('message', message => {
-		ws.send('Message received : ' + message);
+		serialPort.write(message); 
 	});
-	ws.send('Successful connection');
 });
 
 async function initializeDb() {
