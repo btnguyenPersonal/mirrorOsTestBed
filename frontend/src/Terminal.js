@@ -68,7 +68,7 @@ function Terminal({ setPage, commands, id, userId }) {
   };
 
   function releaseSession() {
-    let comp = {userId: userId,id};
+    let comp = {userId: userId,computerId: id};
     fetch(`http://${process.env.REACT_APP_IP}:8080/api/releaseComputer`,
         { 
           method: "POST",
@@ -77,7 +77,14 @@ function Terminal({ setPage, commands, id, userId }) {
           },
           body: JSON.stringify(comp)
         }
-      )
+      ).then(async (response) => {
+        let json = await response.json();
+        if (response.status === 200) {
+          setPage("Dashboard");
+        } else {
+          document.getElementById("fail_message").innerHTML = "<p><small>"+json.message+"</small></p>";
+        }
+      });
   }
 
   let content = (
@@ -103,6 +110,7 @@ function Terminal({ setPage, commands, id, userId }) {
           <button onClick={() => releaseSession()}>
             Release session
           </button>
+        <div id="fail_message"></div>
         </div>
       ) : (
         <Upload />

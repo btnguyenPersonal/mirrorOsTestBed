@@ -38,19 +38,26 @@ function Dashboard({ setPage, setID, userId }) {
           },
           body: JSON.stringify(comp)
         }
-      )
-
-      setPage("Terminal");
+      ).then(async (response) => {
+        let json = await response.json();
+        if (response.status === 200) {
+          setPage("Terminal");
+        } else {
+          document.getElementById("fail_message").innerHTML = "<p><small>"+json.message+"</small></p>";
+        }
+      });
     }
   }
 
   let content = (
     <nav>
       <div className="Header" style={{display: 'flex', justifyContent: 'space-between'}}>
-        <button onClick={() => loadData()}>Refresh Page</button>
+        <button onClick={() => {loadData();
+          document.getElementById("fail_message").innerHTML = "";}}>Refresh Page</button>
         <div >Welcome</div>
         <div>OS Pi Testbed</div>
       </div>
+      <div id="fail_message"></div>
       {loaded ? (
         <ul>
           {list.map((item) => (
