@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Dashboard.css";
 
-function Dashboard({ setPage, setID }) {
+function Dashboard({ setPage, setID, userId }) {
   const [list, setList] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
@@ -14,6 +14,7 @@ function Dashboard({ setPage, setID }) {
   };
 
   useEffect(() => {
+    loadData();
     const interval = setInterval(() => {
       loadData();
     }, 100000);
@@ -28,8 +29,17 @@ function Dashboard({ setPage, setID }) {
   function onBtnClick(id, available) {
     if (available) {
       setID(id);
-      let comp = {userId: 1,id};
-      fetch(`http://${process.env.REACT_APP_IP}:8080/api/useComputer`,{method: "POST",body: comp})
+      let comp = {userId: userId, computerId: id};
+      fetch(`http://${process.env.REACT_APP_IP}:8080/api/useComputer`,
+        { 
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(comp)
+        }
+      )
+
       setPage("Terminal");
     }
   }

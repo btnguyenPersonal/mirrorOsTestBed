@@ -1,7 +1,7 @@
 import { ReactTerminal } from "react-terminal";
 import React, { useState } from "react";
 
-function Terminal({ setPage, commands, id }) {
+function Terminal({ setPage, commands, id, userId }) {
   const [selectedFile, setSelectedFile] = useState();
   const [isFilePicked, setIsFilePicked] = useState(false);
   const [fileUploaded, setFileUploaded] = useState(false);
@@ -67,6 +67,19 @@ function Terminal({ setPage, commands, id }) {
     );
   };
 
+  function releaseSession() {
+    let comp = {userId: userId,id};
+    fetch(`http://${process.env.REACT_APP_IP}:8080/api/releaseComputer`,
+        { 
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(comp)
+        }
+      )
+  }
+
   let content = (
     <div>
       {fileUploaded ? (
@@ -86,6 +99,9 @@ function Terminal({ setPage, commands, id }) {
             }
           >
             Reset Pi
+          </button>
+          <button onClick={() => releaseSession()}>
+            Release session
           </button>
         </div>
       ) : (

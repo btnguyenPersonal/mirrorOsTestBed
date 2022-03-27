@@ -3,7 +3,7 @@ import Chartist from "react-chartist";
 import { useState, useEffect } from "react";
 import Button from "react-bootstrap/esm/Button";
 
-function AdminDashboard({ setPage, setID }) {
+function AdminDashboard({ setPage, setID, userId }) {
   const [graph, setGraph] = useState(false);
   const [list, setList] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -41,8 +41,19 @@ function AdminDashboard({ setPage, setID }) {
 
   function onBtnClick(id, available) {
     if (available) {
-      setPage("Terminal");
       setID(id);
+      let comp = {userId: userId, computerId: id};
+      fetch(`http://${process.env.REACT_APP_IP}:8080/api/useComputer`,
+        { 
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(comp)
+        }
+      )
+
+      setPage("Terminal");
     }
   }
 
@@ -51,6 +62,7 @@ function AdminDashboard({ setPage, setID }) {
   }, []);
 
   const loadData = async () => {
+    setLoaded(false);
     const res = await fetch(
       `http://${process.env.REACT_APP_IP}:8080/api/computer`
     );
@@ -59,7 +71,10 @@ function AdminDashboard({ setPage, setID }) {
 
   useEffect(() => {
     loadData();
-    return () => {};
+    const interval = setInterval(() => {
+      loadData();
+    }, 100000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
