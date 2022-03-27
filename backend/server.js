@@ -95,7 +95,8 @@ wsServer.on("connection", (ws) => {
     if (message.includes("websocket-initialization-message:")) {
       var computerId = message.split(":")[1];
       if (computerIdToWebsocketDict[computerId]) return;
-      computerIdToWebsocketDict[computerId] = ws.computerId;
+      computerIdToWebsocketDict[computerId] = ws;
+      ws.computerId = computerId;
     }
     console.log("Message received from frontend: " + message);
     ws.send("Message received on backend: " + message);
@@ -111,10 +112,10 @@ wsServer.on("connection", (ws) => {
 //The following is to simulate data coming from serial stuff.
 setInterval(() => {
   simulateComputersReceivingData();
-}, 3000);
+}, 10000);
 function simulateComputersReceivingData() {
   for (var computerId in computerIdToWebsocketDict) {
     let ws = computerIdToWebsocketDict[computerId];
-    ws.send("faking some serial data every 3 seconds. This data is only being sent to computerId=" + computerId);
+    ws.send("faking some serial data every 10 seconds. This data is only being sent to computerId=" + computerId);
   }
 }
