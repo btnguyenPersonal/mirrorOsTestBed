@@ -20,14 +20,12 @@ function Terminal() {
   const onKey = (event) => {
     if(event.key === '\r') {
       //send through websocket
-      console.log("sending msg...");
       ws.send(messageString);
       messageString = "";
       prompt(false);
     }
 
     else {
-      console.log(event.key);
       messageString += event.key;
       XTermRef.current.terminal.write(event.key);
     }
@@ -39,7 +37,6 @@ function Terminal() {
   React.useEffect(() => {
       //initialize websocket
     ws.addEventListener("open", () =>{
-      console.log("connected to server");
       ws.send(msg);
     });
     prompt(true);
@@ -47,7 +44,6 @@ function Terminal() {
 
     //websocket on message
     ws.onmessage = function (event) {
-      console.log(event.data);
       XTermRef.current.terminal.write(event.data);
       prompt(false);
     };

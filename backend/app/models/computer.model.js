@@ -8,6 +8,9 @@ module.exports = (sequelize, Sequelize) => {
     portId: {
       type: Sequelize.INTEGER,
     },
+    serialNumber: {
+      type: Sequelize.STRING,
+    },
     model: {
       type: Sequelize.STRING,
     },
