@@ -44,12 +44,26 @@ app.listen(PORT, () => {
 
 app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
+var {SerialPort, ReadlineParser} = require("serialport");
+var serialPort = new SerialPort ({
+  path: "/dev/ttyUSB0",
+  baudRate: 115200
+});
+var parser = new ReadlineParser();
+serialPort.pipe(parser);
+
 // create websocket connection
 wsServer.on('connection', ws => {
+  // send serial data through websocket
+  parser.on('data', function(data) {
+    console.log(data);
+    ws.send(data);
+  });
+
+  // send websocket message through serial port
 	ws.on('message', message => {
-		ws.send('Message received : ' + message);
+		serialPort.write(message); 
 	});
-	ws.send('Successful connection');
 });
 
 async function initializeDb() {
@@ -72,11 +86,11 @@ async function initializeDb() {
     hashedPassword = await bcrypt.hash("adminpassword", 10);
     await Password.create({ password: hashedPassword, isAdminPassword: 1 });
     //Computer stuff. inUse is false by default.
-    await Computer.create({ portId: 2, model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 3, model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 4, model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 5, model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 6, model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 7, model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 2, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 3, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 4, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 5, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 6, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
+    await Computer.create({ portId: 7, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
   });
 }
