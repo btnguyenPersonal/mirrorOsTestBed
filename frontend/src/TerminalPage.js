@@ -1,7 +1,7 @@
-import { ReactTerminal } from "react-terminal";
+import Terminal from './terminalComponents/Terminal'
 import React, { useState } from "react";
 
-function Terminal({ setPage, commands, id, userId }) {
+function TerminalPage({ setPage, id, userId }) {
   const [selectedFile, setSelectedFile] = useState();
   const [isFilePicked, setIsFilePicked] = useState(false);
   const [fileUploaded, setFileUploaded] = useState(false);
@@ -115,10 +115,11 @@ function Terminal({ setPage, commands, id, userId }) {
       ) : (
         <Upload />
       )}
-      <ReactTerminal commands={commands} />
+
+      <Terminal />
     </div>
   );
   return content;
 }
 
-export default Terminal;
+export default TerminalPage;

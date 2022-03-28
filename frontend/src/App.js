@@ -1,6 +1,6 @@
 import './App.css';
-import './Terminal.css';
-import Terminal from './Terminal'
+import './TerminalPage.css';
+import TerminalPage from './TerminalPage'
 import Login from './Login';
 import React, { useState } from 'react';
 import Dashboard from './dashboards/Dashboard';
@@ -11,20 +11,12 @@ function App() {
   const [id, setID] = useState(-1);
   const [userId, setUserId] = useState(-1);
 
-  const commands = {
-    user: "BrandonB",
-    command1: "this is command 1",
-    command2: "this is command 2",
-    poe: "pi has been reset",
-    cd: (directory) => `changed path to ${directory}`
-  };
-
   return (
     <div className="App">
     {page === "Login" && <Login setPage={setPage} setUserId={setUserId} />}
     {page === "Dashboard" && <Dashboard setPage={setPage} setID={setID} userId={userId} />}
     {page === "AdminDashboard" && <AdminDashboard setPage={setPage} setID={setID} userId={userId} />}
-    {page === "Terminal" && <Terminal className="Terminal" setPage={setPage} commands={commands} id={id} userId={userId} />}
+    {page === "TerminalPage" && <TerminalPage className="TerminalPage" setPage={setPage} id={id} userId={userId} />}
     </div>
 
   );

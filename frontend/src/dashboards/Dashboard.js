@@ -41,7 +41,7 @@ function Dashboard({ setPage, setID, userId }) {
       ).then(async (response) => {
         let json = await response.json();
         if (response.status === 200) {
-          setPage("Terminal");
+          setPage("TerminalPage");
         } else {
           document.getElementById("fail_message").innerHTML = "<p><small>"+json.message+"</small></p>";
         }
