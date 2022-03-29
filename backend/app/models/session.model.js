@@ -1,6 +1,8 @@
 module.exports = (db) => {
   var sequelize = db.sequelize;
   var Sequelize = db.Sequelize;
+  const Computer = db.computer;
+  const User = db.user;
   const Session = sequelize.define(
     "sessions",
     {
@@ -27,7 +29,7 @@ module.exports = (db) => {
       updatedAt: false,
     }
   );
-  Session.belongsTo(db.computer, {foreignKey: "computerId"})
-  Session.belongsTo(db.user, {foreignKey: "userId"})
+  Session.belongsTo(Computer, {foreignKey: "computerId"})
+  Session.belongsTo(User, {foreignKey: "userId"})
   return Session;
 };
