@@ -7,39 +7,24 @@ const User = db.user;
 const bcrypt = require("bcrypt");
 const utils = require("../config/utils.js");
 require("dotenv").config();
-
 const exec = require("await-exec");
 
-const NUMBER_OF_PORTS = 7;
-
 exports.reboot = async (req, res) => {
-  /*
-    #swagger.tags = ['api']
-    #swagger.description = 'Reboots the PoE for a specific computer by calling a script on the backend.'
-    #swagger.parameters['id'] = { 
-      in: 'path',
-      description: 'The computer id to reboot.' ,
-      type: 'integer'
-    }
-    #swagger.responses[200] = { description: 'Sent when the command was executed successfully.' }
-    #swagger.responses[412] = { description: 'Sent when the computer ID specified does not exist.' }
-    #swagger.responses[500] = { description: 'Sent when something went wrong with the backend outside of frontend\'s control.' }
-  */
+  //Get the computer ID to reboot from the request.
   const computerId = req.params.id;
+  //Get the computer object from the database (using sequelize).
   let theComputer = await Computer.findByPk(computerId);
+  //If a computer with the passed in computer ID cannot be found, inform the user.
   if (!theComputer) {
     res.status(412).send({
       message: "Computer ID: " + computerId + " doesnt exist.",
     });
     return;
   }
+  //Get the port ID to reset on the switch from the computer object.
   const portId = theComputer.portId;
-
-  //This code will eventually be moved into a "runCommand" function.
+  //Execute the reboot script passing in the port ID to reboot.
   let command = ` ./reboot.sh ${portId}`;
-  if (process.env.OS.includes("Windows")) {
-    command = "cd"; //Windows can't run our command without Windows Subsystem for Linux (WSL) and I can't install it lol.
-  }
   return await exec(command)
     .then((r) => {
       if (!r.stderr) {
