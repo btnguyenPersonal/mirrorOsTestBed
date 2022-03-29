@@ -1,6 +1,7 @@
 const db = require("..");
 const Event = db.event;
 const EventType = db.eventType;
+const User = db.user;
 const utils = require("../config/utils.js");
 const Op = db.Sequelize.Op;
 exports.create = (req, res) => {
@@ -37,6 +38,8 @@ exports.findAll = async (req, res) => {
         theEvent = data[eventIndex];
         theEventType = await EventType.findByPk(theEvent.dataValues.eventTypeId);
         data[eventIndex].dataValues.eventType = theEventType;
+        theUser = await User.findByPk(theEvent.dataValues.userId);
+        data[eventIndex].dataValues.user = theUser;
       }
       res.send(data);
     })
@@ -55,6 +58,8 @@ exports.findOne = async (req, res) => {
       if (theEvent) {
         theEventType = await EventType.findByPk(theEvent.dataValues.eventTypeId);
         theEvent.dataValues.eventType = theEventType;
+        theUser = await User.findByPk(theEvent.dataValues.userId);
+        theEvent.dataValues.user = theUser;
         res.send(theEvent);
       } else {
         res.status(500).send({
