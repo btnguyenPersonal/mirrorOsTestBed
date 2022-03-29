@@ -17,7 +17,7 @@ exports.reboot = async (req, res) => {
   //Checks that the computer requested actually exists.
   if (!theComputer) {
     res.status(412).send({
-      message: "Computer ID: " + computerId + " doesnt exist.",
+      message: "Computer ID: " + computerId + " does not exist.",
     });
     return;
   }
