@@ -44,25 +44,26 @@ app.listen(PORT, () => {
 
 app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-var {SerialPort, ReadlineParser} = require("serialport");
-var serialPort = new SerialPort ({
-  path: "/dev/ttyUSB0",
-  baudRate: 115200
-});
-var parser = new ReadlineParser();
-serialPort.pipe(parser);
+// var {SerialPort, ReadlineParser} = require("serialport");
+// var serialPort = new SerialPort ({
+//   path: "/dev/ttyUSB0",
+//   baudRate: 115200
+// });
+// var parser = new ReadlineParser();
+// serialPort.pipe(parser);
 
 // create websocket connection
 wsServer.on('connection', ws => {
   // send serial data through websocket
-  parser.on('data', function(data) {
-    console.log(data);
-    ws.send(data);
-  });
+  // parser.on('data', function(data) {
+  //   console.log(data);
+  //   ws.send(data);
+  // });
 
   // send websocket message through serial port
 	ws.on('message', message => {
-		serialPort.write(message); 
+    ws.send(message);
+		//serialPort.write(message); 
 	});
 });
 
@@ -71,7 +72,8 @@ async function initializeDb() {
   const Password = db.password;
   const Computer = db.computer;
   //The following is to wipe the database everytime.
-  db.sequelize.sync({ force: true }).then(async () => {
+  db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', {raw: true})
+  .then(() => db.sequelize.sync({ force: true }).then(async () => {
     console.log("Drop and re-sync db.");
     //Order in which event types are created matters. See utils file for correct order.
     await EventType.create({ eventType: "login" });
@@ -92,5 +94,6 @@ async function initializeDb() {
     await Computer.create({ portId: 5, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
     await Computer.create({ portId: 6, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
     await Computer.create({ portId: 7, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
-  });
-}
+  })
+  )
+};

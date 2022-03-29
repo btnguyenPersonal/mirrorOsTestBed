@@ -1,5 +1,6 @@
 const db = require("..");
 const Event = db.event;
+const EventType = db.eventType;
 const utils = require("../config/utils.js");
 const Op = db.Sequelize.Op;
 exports.create = (req, res) => {
@@ -28,10 +29,15 @@ exports.create = (req, res) => {
     });
 };
 
-exports.findAll = (req, res) => {
+exports.findAll = async (req, res) => {
   // #swagger.tags = ['event']
   Event.findAll()
-    .then((data) => {
+    .then(async (data) => {
+      for(var eventIndex in data) {
+        theEvent = data[eventIndex];
+        theEventType = await EventType.findByPk(theEvent.dataValues.eventTypeId);
+        data[eventIndex].dataValues.eventType = theEventType;
+      }
       res.send(data);
     })
     .catch((err) => {
@@ -41,13 +47,15 @@ exports.findAll = (req, res) => {
     });
 };
 
-exports.findOne = (req, res) => {
+exports.findOne = async (req, res) => {
   // #swagger.tags = ['event']
   const id = req.params.id;
   Event.findByPk(id)
-    .then((data) => {
-      if (data) {
-        res.send(data);
+    .then(async (theEvent) => {
+      if (theEvent) {
+        theEventType = await EventType.findByPk(theEvent.dataValues.eventTypeId);
+        theEvent.dataValues.eventType = theEventType;
+        res.send(theEvent);
       } else {
         res.status(500).send({
           message: `Cannot find Event with id=${id}.`,

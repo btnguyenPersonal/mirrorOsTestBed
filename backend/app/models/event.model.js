@@ -1,4 +1,6 @@
-module.exports = (sequelize, Sequelize) => {
+module.exports = (db) => {
+  var sequelize = db.sequelize;
+  var Sequelize = db.Sequelize;
   const Event = sequelize.define(
     "events",
     {
@@ -18,5 +20,6 @@ module.exports = (sequelize, Sequelize) => {
       updatedAt: false,
     }
   );
+  Event.belongsTo(db.eventType, {foreignKey: "eventTypeId"});
   return Event;
 };
