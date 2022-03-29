@@ -14,7 +14,7 @@ exports.reboot = async (req, res) => {
   const computerId = req.params.id;
   //Get the computer object from the database (using sequelize).
   let theComputer = await Computer.findByPk(computerId);
-  //If a computer with the passed in computer ID cannot be found, inform the user.
+  //Checks that the computer requested actually exists.
   if (!theComputer) {
     res.status(412).send({
       message: "Computer ID: " + computerId + " doesnt exist.",
