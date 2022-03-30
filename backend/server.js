@@ -8,6 +8,8 @@ const webSocket = require('ws');
 const swaggerUi = require("swagger-ui-express");
 const swaggerFile = require("./app/config/swagger_output.json");
 
+const {SerialPort, ReadlineParser} = require("serialport");
+
 const app = express();
 var corsOptions = {
   origin: `http://${process.env.IP}:3000`,
@@ -44,25 +46,37 @@ app.listen(PORT, () => {
 
 app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-var {SerialPort, ReadlineParser} = require("serialport");
-var serialPort = new SerialPort ({
-  path: "/dev/ttyUSB0",
-  baudRate: 115200
-});
 var parser = new ReadlineParser();
-serialPort.pipe(parser);
+var serialPort;
+initSerialPort();
+
+async function initSerialPort() {
+  var serialPortList = await SerialPort.list();
+  var filteredPorts = serialPortList.filter(
+    serialp => serialp.path === process.env.SERIAL_PORT_PATH
+    );
+
+  if(filteredPorts.length === 1) {
+      serialPort = new SerialPort ({
+      path: process.env.SERIAL_PORT_PATH,
+      baudRate: 115200
+    });
+      
+    serialPort.pipe(parser);  
+  }   
+}
 
 // create websocket connection
 wsServer.on('connection', ws => {
   // send serial data through websocket
   parser.on('data', function(data) {
-    console.log(data);
     ws.send(data);
   });
 
   // send websocket message through serial port
 	ws.on('message', message => {
-		serialPort.write(message); 
+    if(serialPort)
+		  serialPort.write(message); 
 	});
 });
 

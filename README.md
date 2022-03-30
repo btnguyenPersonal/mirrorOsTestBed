@@ -39,6 +39,7 @@ DB_SCHEMA="ostestbed"
 DB_HOST="localhost"
 IP="localhost"
 PORT=8080
+SERIAL_PORT_PATH="<insert your serial port path here>"
 OS="<insert your OS here>"
 ```
 
@@ -74,8 +75,8 @@ now you can type `localhost:3000` in your browser to view the website!
 - [x] backend docs
 - [ ] admin dashboard
 - [ ] websocket connection for terminal
-- [ ] network boot for the pi's with xv6
+- [ ] network boot the pi
 - [ ] get requests for pi information
 - [ ] reboot/back/logout frontend buttons
-- [ ] file upload
+- [x] file upload
 
