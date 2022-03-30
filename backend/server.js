@@ -74,7 +74,7 @@ wsServer.on('connection', ws => {
   });
 
   // send websocket message through serial port
-	ws.on('message', message => {
+ ws.on('message', message => {
     if(serialPort)
 		  serialPort.write(message); 
 	});
