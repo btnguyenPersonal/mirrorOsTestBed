@@ -10,6 +10,18 @@ require("dotenv").config();
 const exec = require("await-exec");
 
 exports.reboot = async (req, res) => {
+  /*
+    #swagger.tags = ['api']
+    #swagger.description = 'Reboots the PoE for a specific computer by calling a script on the backend.'
+    #swagger.parameters['id'] = { 
+      in: 'path',
+      description: 'The computer id to reboot.' ,
+      type: 'integer'
+    }
+    #swagger.responses[200] = { description: 'Sent when the command was executed successfully.' }
+    #swagger.responses[412] = { description: 'Sent when the computer ID specified does not exist.' }
+    #swagger.responses[500] = { description: 'Sent when something went wrong with the backend outside of frontend\'s control.' }
+  */
   //Get the computer ID to reboot from the request.
   const computerId = req.params.id;
   //Get the computer object from the database (using sequelize).
@@ -25,6 +37,9 @@ exports.reboot = async (req, res) => {
   const portId = theComputer.portId;
   //Execute the reboot script passing in the port ID to reboot.
   let command = ` ./reboot.sh ${portId}`;
+  if (process.env.OS.includes("Windows")) {
+    command = "cd"; //Windows can't run our command without Windows Subsystem for Linux (WSL) and I can't install it lol.
+  }
   return await exec(command)
     .then((r) => {
       if (!r.stderr) {
