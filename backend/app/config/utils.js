@@ -5,10 +5,9 @@ module.exports = {
   CHANGED_ADMIN_PASSWORD_EVENT_ID: 4,
   SESSION_START_EVENT_ID: 5,
   SESSION_END_EVENT_ID: 6,
-
   isBodyValid(req, res, requirements) {
     for (const [key, value] of Object.entries(requirements)) {
-      if (!req.body[key]) {
+      if (req.body[key] == undefined) {
         res.status(412).send({
           message: `Missing attribute: "${key}": <${value}>`,
         });

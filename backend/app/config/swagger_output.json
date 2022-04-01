@@ -426,13 +426,16 @@
             "schema": {
               "type": "object",
               "properties": {
-                "authEmail": {
-                  "example": "any"
-                },
-                "password": {
+                "userId": {
                   "example": "any"
                 },
                 "changeAdminPassword": {
+                  "example": "any"
+                },
+                "oldPassword": {
+                  "example": "any"
+                },
+                "newPassword": {
                   "example": "any"
                 }
               }

@@ -5,6 +5,7 @@ import Login from './Login';
 import React, { useState } from 'react';
 import Dashboard from './dashboards/Dashboard';
 import AdminDashboard from './dashboards/AdminDashboard';
+import ChangePasswordForm from './ChangePasswordForm';
 
 function App() {
   const [page, setPage] = useState("Login");
@@ -17,6 +18,7 @@ function App() {
     {page === "Dashboard" && <Dashboard setPage={setPage} setID={setID} userId={userId} />}
     {page === "AdminDashboard" && <AdminDashboard setPage={setPage} setID={setID} userId={userId} />}
     {page === "TerminalPage" && <TerminalPage className="TerminalPage" setPage={setPage} id={id} userId={userId} />}
+    {page === "ChangePasswordForm" && <ChangePasswordForm setPage={setPage} userId={userId} />}
     </div>
 
   );

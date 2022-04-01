@@ -1,4 +1,6 @@
-module.exports = (sequelize, Sequelize) => {
+module.exports = (db) => {
+  var sequelize = db.sequelize;
+  var Sequelize = db.Sequelize;
   const User = sequelize.define("users", {
     userId: {
       type: Sequelize.INTEGER,

@@ -2,6 +2,7 @@ import "./AdminDashboard.css";
 import Chartist from "react-chartist";
 import { useState, useEffect } from "react";
 import Button from "react-bootstrap/esm/Button";
+import ChangePassword from '../ChangePasswordForm'
 
 function AdminDashboard({ setPage, setID, userId }) {
   const [graph, setGraph] = useState(false);
@@ -94,6 +95,10 @@ function AdminDashboard({ setPage, setID, userId }) {
         {!graph && <Button onClick={() => setGraph(true)}>Use Graph</Button>}
         {graph && <Chartist data={chartA} options={optionsA} type={"Bar"} />}
       </div>
+      <br/>
+      <button onClick={() => setPage("ChangePasswordForm")}>
+        Go to Change Password
+      </button>
       <div id="fail_message"></div>
       {loaded ? (
         <ul>

@@ -71,10 +71,12 @@ async function initializeDb() {
   const EventType = db.eventType;
   const Password = db.password;
   const Computer = db.computer;
+  const User = db.user;
   //The following is to wipe the database everytime.
   db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', {raw: true})
   .then(() => db.sequelize.sync({ force: true }).then(async () => {
     console.log("Drop and re-sync db.");
+    await User.create({ userId: 1, email: "csmith48@iastate.edu", isAdmin: 1 })
     //Order in which event types are created matters. See utils file for correct order.
     await EventType.create({ eventType: "login" });
     await EventType.create({ eventType: "admin login" });
