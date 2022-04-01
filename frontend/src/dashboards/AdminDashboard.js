@@ -2,7 +2,6 @@ import "./AdminDashboard.css";
 import Chartist from "react-chartist";
 import { useState, useEffect } from "react";
 import Button from "react-bootstrap/esm/Button";
-import ChangePassword from '../ChangePasswordForm'
 
 function AdminDashboard({ setPage, setID, userId }) {
   const [graph, setGraph] = useState(false);
