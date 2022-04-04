@@ -7,10 +7,7 @@ const User = db.user;
 const bcrypt = require("bcrypt");
 const utils = require("../config/utils.js");
 require("dotenv").config();
-
 const exec = require("await-exec");
-
-const NUMBER_OF_PORTS = 7;
 
 exports.reboot = async (req, res) => {
   /*
@@ -25,17 +22,20 @@ exports.reboot = async (req, res) => {
     #swagger.responses[412] = { description: 'Sent when the computer ID specified does not exist.' }
     #swagger.responses[500] = { description: 'Sent when something went wrong with the backend outside of frontend\'s control.' }
   */
+  //Get the computer ID to reboot from the request.
   const computerId = req.params.id;
+  //Get the computer object from the database (using sequelize).
   let theComputer = await Computer.findByPk(computerId);
+  //Checks that the computer requested actually exists.
   if (!theComputer) {
     res.status(412).send({
-      message: "Computer ID: " + computerId + " doesnt exist.",
+      message: "Computer ID: " + computerId + " does not exist.",
     });
     return;
   }
+  //Get the port ID to reset on the switch from the computer object.
   const portId = theComputer.portId;
-
-  //This code will eventually be moved into a "runCommand" function.
+  //Execute the reboot script passing in the port ID to reboot.
   let command = ` ./reboot.sh ${portId}`;
   if (process.env.OS.includes("Windows")) {
     command = "cd"; //Windows can't run our command without Windows Subsystem for Linux (WSL) and I can't install it lol.

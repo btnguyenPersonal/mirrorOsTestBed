@@ -1,4 +1,6 @@
-module.exports = (sequelize, Sequelize) => {
+module.exports = (db) => {
+  var sequelize = db.sequelize;
+  var Sequelize = db.Sequelize;
   const Computer = sequelize.define("computers", {
     computerId: {
       type: Sequelize.INTEGER,

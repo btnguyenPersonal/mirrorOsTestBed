@@ -5,7 +5,7 @@
     "title": "OSTestBed API",
     "description": "OSTestBed API"
   },
-  "host": "undefined:8080",
+  "host": "localhost:8080",
   "basePath": "/",
   "tags": [
     {
@@ -426,13 +426,16 @@
             "schema": {
               "type": "object",
               "properties": {
-                "authEmail": {
-                  "example": "any"
-                },
-                "password": {
+                "userId": {
                   "example": "any"
                 },
                 "changeAdminPassword": {
+                  "example": "any"
+                },
+                "oldPassword": {
+                  "example": "any"
+                },
+                "newPassword": {
                   "example": "any"
                 }
               }

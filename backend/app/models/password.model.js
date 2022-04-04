@@ -1,4 +1,6 @@
-module.exports = (sequelize, Sequelize) => {
+module.exports = (db) => {
+  var sequelize = db.sequelize;
+  var Sequelize = db.Sequelize;
   const Password = sequelize.define("passwords", {
     passwordId: {
       type: Sequelize.INTEGER,

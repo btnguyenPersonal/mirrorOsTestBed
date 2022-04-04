@@ -11,13 +11,14 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
     idle: dbConfig.pool.idle,
   },
 });
-const db = {};
+var db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
-db.user = require("./models/user.model.js")(sequelize, Sequelize);
-db.eventType = require("./models/eventType.model.js")(sequelize, Sequelize);
-db.event = require("./models/event.model.js")(sequelize, Sequelize);
-db.password = require("./models/password.model.js")(sequelize, Sequelize);
-db.computer = require("./models/computer.model.js")(sequelize, Sequelize);
-db.session = require("./models/session.model.js")(sequelize, Sequelize);
+db.user = require("./models/user.model.js")(db);
+db.eventType = require("./models/eventType.model.js")(db);
+db.event = require("./models/event.model.js")(db);
+db.password = require("./models/password.model.js")(db);
+db.computer = require("./models/computer.model.js")(db);
+db.session = require("./models/session.model.js")(db);
+
 module.exports = db;

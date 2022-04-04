@@ -9,37 +9,42 @@ exports.create = async (req, res) => {
   // #swagger.tags = ['password']
   if (
     !utils.isBodyValid(req, res, {
-      password: "string",
-      authEmail: "string",
+      oldPassword: "string",
+      newPassword: "string",
+      userId: "integer",
       changeAdminPassword: "boolean",
     })
   ) {
     return;
   }
-  User.findOne({
-    where: {
-      email: req.body.authEmail,
-    },
-  }).then(async (data) => {
-    if (data) {
-      if (data.dataValues.isAdmin) {
-        hashedPassword = await bcrypt.hash(req.body.password, 10);
+  User.findByPk(req.body.userId).then(async (user) => {
+    if (user) {
+      if (user.dataValues.isAdmin) {
+        //Get current normal or admin password.
         let sqlPassword = await Password.findOne({
           where: {
             isAdminPassword: req.body.changeAdminPassword,
           },
           order: [["createdAt", "DESC"]],
         });
-        sqlPassword.password = hashedPassword;
-        await sqlPassword.save();
-        await Event.create({
-          eventTypeId: req.body.changeAdminPassword ? utils.CHANGED_ADMIN_PASSWORD_EVENT_ID : utils.CHANGED_PASSWORD_EVENT_ID,
-          userId: data.dataValues.userId,
-        });
-        res.status(200).send({
-          message: (req.body.changeAdminPassword ? "Admin password" : "Password") + " changed successfully.",
-          password: sqlPassword,
-        });
+        doOldPasswordsMatch = await bcrypt.compare(req.body.oldPassword, sqlPassword.password);
+        if(doOldPasswordsMatch) {
+          hashedNewPassword = await bcrypt.hash(req.body.newPassword, 10);
+          sqlPassword.password = hashedNewPassword;
+          await sqlPassword.save();
+          await Event.create({
+            eventTypeId: req.body.changeAdminPassword ? utils.CHANGED_ADMIN_PASSWORD_EVENT_ID : utils.CHANGED_PASSWORD_EVENT_ID,
+            userId: user.dataValues.userId,
+          });
+          res.status(200).send({
+            message: (req.body.changeAdminPassword ? "Admin password" : "Password") + " changed successfully.",
+            password: sqlPassword,
+          });
+        } else {
+          res.status(403).send({
+            message: "Old password does not match the " + (req.body.changeAdminPassword ? "admin password" : "password") + ".",
+          });
+        }
       } else {
         res.status(403).send({
           message: "Not an admin. Don't even try...",
@@ -47,7 +52,7 @@ exports.create = async (req, res) => {
       }
     } else {
       res.status(401).send({
-        message: "Couldn't find email: " + req.body.authEmail,
+        message: "Could not find a user with userId: " + req.body.userId,
       });
     }
   });
