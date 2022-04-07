@@ -1,5 +1,6 @@
-import Terminal from './terminalComponents/Terminal'
+import Terminal from "./terminalComponents/Terminal";
 import React, { useState } from "react";
+//import { useEffect } from "react/cjs/react.production.min";
 
 function TerminalPage({ setPage, id, userId }) {
   const [selectedFile, setSelectedFile] = useState();
@@ -68,24 +69,40 @@ function TerminalPage({ setPage, id, userId }) {
   };
 
   function releaseSession() {
-    let comp = {userId: userId,computerId: id};
-    fetch(`http://${process.env.REACT_APP_IP}:8080/api/releaseComputer`,
-        { 
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(comp)
-        }
-      ).then(async (response) => {
-        let json = await response.json();
-        if (response.status === 200) {
-          setPage("Dashboard");
-        } else {
-          document.getElementById("fail_message").innerHTML = "<p><small>"+json.message+"</small></p>";
-        }
-      });
+    let comp = { userId: userId, computerId: id };
+    fetch(`http://${process.env.REACT_APP_IP}:8080/api/releaseComputer`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(comp),
+    }).then(async (response) => {
+      let json = await response.json();
+      if (response.status === 200) {
+        setPage("Dashboard");
+      } else {
+        document.getElementById("fail_message").innerHTML =
+          "<p><small>" + json.message + "</small></p>";
+      }
+    });
   }
+
+  React.useEffect(() => {
+    const cleanup = () => {
+      let comp = { userId: userId, computerId: id };
+      fetch(`http://${process.env.REACT_APP_IP}:8080/api/releaseComputer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(comp),
+      });
+    };
+    window.addEventListener("beforeunload", cleanup);
+    return () => {
+      window.removeEventListener("beforeunload", cleanup);
+    };
+  }, []);
 
   let content = (
     <div>
@@ -107,10 +124,8 @@ function TerminalPage({ setPage, id, userId }) {
           >
             Reset Pi
           </button>
-          <button onClick={() => releaseSession()}>
-            Release session
-          </button>
-        <div id="fail_message"></div>
+          <button onClick={() => releaseSession()}>Release session</button>
+          <div id="fail_message"></div>
         </div>
       ) : (
         <Upload />
