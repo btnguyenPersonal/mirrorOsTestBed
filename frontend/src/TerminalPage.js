@@ -1,6 +1,5 @@
 import Terminal from "./terminalComponents/Terminal";
 import React, { useState } from "react";
-//import { useEffect } from "react/cjs/react.production.min";
 
 function TerminalPage({ setPage, id, userId }) {
   const [selectedFile, setSelectedFile] = useState();
@@ -23,7 +22,6 @@ function TerminalPage({ setPage, id, userId }) {
     })
       .then((response) => response.json())
       .then((result) => {
-        //console.log("Success:", result);
         if (result.message !== "Successful file upload") {
           document.getElementById("errorStatus").innerHTML =
             "<p>" + result.message + "</p>";
@@ -34,7 +32,6 @@ function TerminalPage({ setPage, id, userId }) {
         }
       })
       .catch((error) => {
-        //console.error("Error:", error);
         setFileUploaded(true);
         document.getElementById("fileStatus").innerHTML =
           "<p>" + error + "</p>";
