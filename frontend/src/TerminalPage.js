@@ -1,7 +1,7 @@
 import Terminal from "./terminalComponents/Terminal";
 import React, { useState } from "react";
 
-function TerminalPage({ setPage, id, userId }) {
+function TerminalPage({ setPage, computerId, userId }) {
   const [selectedFile, setSelectedFile] = useState();
   const [isFilePicked, setIsFilePicked] = useState(false);
   const [fileUploaded, setFileUploaded] = useState(false);
@@ -16,7 +16,7 @@ function TerminalPage({ setPage, id, userId }) {
 
     formData.append("imgFile", selectedFile);
 
-    fetch(`http://${process.env.REACT_APP_IP}:8080/api/upload/${id}`, {
+    fetch(`http://${process.env.REACT_APP_IP}:8080/api/upload/${computerId}`, {
       method: "POST",
       body: formData,
     })
@@ -66,7 +66,7 @@ function TerminalPage({ setPage, id, userId }) {
   };
 
   function releaseSession() {
-    let comp = { userId: userId, computerId: id };
+    let comp = { userId: userId, computerId: computerId };
     fetch(`http://${process.env.REACT_APP_IP}:8080/api/releaseComputer`, {
       method: "POST",
       headers: {
@@ -86,7 +86,7 @@ function TerminalPage({ setPage, id, userId }) {
 
   React.useEffect(() => {
     const cleanup = () => {
-      let comp = { userId: userId, computerId: id };
+      let comp = { userId: userId, computerId: computerId };
       fetch(`http://${process.env.REACT_APP_IP}:8080/api/releaseComputer`, {
         method: "POST",
         headers: {
@@ -112,7 +112,7 @@ function TerminalPage({ setPage, id, userId }) {
           <button
             onClick={() =>
               fetch(
-                `http://${process.env.REACT_APP_IP}:8080/api/reboot/${id}`,
+                `http://${process.env.REACT_APP_IP}:8080/api/reboot/${computerId}`,
                 {
                   method: "POST",
                 }
@@ -128,7 +128,7 @@ function TerminalPage({ setPage, id, userId }) {
         <Upload />
       )}
 
-      <Terminal />
+      <Terminal computerId={computerId} userId={userId}/>
     </div>
   );
   return content;

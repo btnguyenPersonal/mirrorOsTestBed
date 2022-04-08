@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Dashboard.css";
 
-function Dashboard({ setPage, setID, userId }) {
+function Dashboard({ setPage, setComputerId, userId }) {
   const [list, setList] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
@@ -26,10 +26,9 @@ function Dashboard({ setPage, setID, userId }) {
       setLoaded(true);
   }, [list]);
 
-  function onBtnClick(id, available) {
+  function onBtnClick(computerId, available) {
     if (available) {
-      setID(id);
-      let comp = {userId: userId, computerId: id};
+      let comp = {userId: userId, computerId: computerId};
       fetch(`http://${process.env.REACT_APP_IP}:8080/api/useComputer`,
         { 
           method: "POST",
@@ -41,6 +40,7 @@ function Dashboard({ setPage, setID, userId }) {
       ).then(async (response) => {
         let json = await response.json();
         if (response.status === 200) {
+          setComputerId(computerId);
           setPage("TerminalPage");
         } else {
           document.getElementById("fail_message").innerHTML = "<p><small>"+json.message+"</small></p>";
