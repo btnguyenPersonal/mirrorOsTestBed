@@ -6,6 +6,19 @@ function TerminalPage({ setPage, computerId, userId }) {
   const [isFilePicked, setIsFilePicked] = useState(false);
   const [fileUploaded, setFileUploaded] = useState(false);
 
+  var [ws] = useState(new WebSocket(`ws://${process.env.REACT_APP_IP}:9000`));
+
+  React.useEffect(() => {
+    initWebSocket();
+    window.onbeforeunload = () => releaseSession(true);
+    return () => {
+      window.removeEventListener("beforeunload", () => {});
+    };
+  });
+
+  const XTermRef = React.useRef();
+  const XTermOpt = { cursorBlink: true }
+
   const changeHandler = (event) => {
     setSelectedFile(event.target.files[0]);
     setIsFilePicked(true);
@@ -65,15 +78,18 @@ function TerminalPage({ setPage, computerId, userId }) {
     );
   };
 
-  function releaseSession() {
+  async function releaseSession(isExitingPage) {
+    console.log("released session...");
     let comp = { userId: userId, computerId: computerId };
-    fetch(`http://${process.env.REACT_APP_IP}:8080/api/releaseComputer`, {
+    await fetch(`http://${process.env.REACT_APP_IP}:8080/api/releaseComputer`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(comp),
     }).then(async (response) => {
+      ws.close();
+      if(isExitingPage) return;
       let json = await response.json();
       if (response.status === 200) {
         setPage("Dashboard");
@@ -84,22 +100,33 @@ function TerminalPage({ setPage, computerId, userId }) {
     });
   }
 
-  React.useEffect(() => {
-    const cleanup = () => {
-      let comp = { userId: userId, computerId: computerId };
-      fetch(`http://${process.env.REACT_APP_IP}:8080/api/releaseComputer`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(comp),
-      });
+
+
+
+  async function initWebSocket() {
+
+    ws.onopen = () => {
+      ws.send("websocket-initialization-message:" + computerId);
+      printToTerminal("You are now in control of computerId=" + computerId);
     };
-    window.addEventListener("beforeunload", cleanup);
-    return () => {
-      window.removeEventListener("beforeunload", cleanup);
+
+    ws.onmessage = (messageFromBackend) => {
+      printToTerminal(messageFromBackend.data);
     };
-  }, []);
+
+    ws.onclose = () => {
+      printToTerminal("Websocket closed.");
+    }
+
+
+  }
+
+  function printToTerminal(str) {
+    if(XTermRef.current) {
+      XTermRef.current.terminal.write(str + "\r\n$ ");
+    }
+  }
+
 
   let content = (
     <div>
@@ -121,14 +148,15 @@ function TerminalPage({ setPage, computerId, userId }) {
           >
             Reset Pi
           </button>
-          <button onClick={() => releaseSession()}>Release session</button>
+          <button onClick={() => releaseSession(false)}>Release session</button>
           <div id="fail_message"></div>
         </div>
       ) : (
         <Upload />
       )}
 
-      <Terminal computerId={computerId} userId={userId}/>
+      <Terminal XTermOpt={XTermOpt} XTermRef={XTermRef} ws={ws}/>
+      <button onClick={() => releaseSession(false)}>Release session</button>
     </div>
   );
   return content;

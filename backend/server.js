@@ -44,30 +44,6 @@ app.listen(PORT, () => {
 
 app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-// var {SerialPort, ReadlineParser} = require("serialport");
-// var serialPort = new SerialPort ({
-//   path: "/dev/ttyUSB0",
-//   baudRate: 115200
-// });
-// var parser = new ReadlineParser();
-// serialPort.pipe(parser);
-
-// create websocket connection
-wsServer.on('connection', ws => {
-  // send serial data through websocket
-  // parser.on('data', function(data) {
-  //   console.log(data);
-  //   ws.send(data);
-  // });
-
-  // send websocket message through serial port
-	ws.on('message', message => {
-    ws.send(message);
-		//serialPort.write(message); 
-	});
-});
-
-
 // create websocket connection
 var computerIdToWebsocketDict = {};
 
@@ -94,7 +70,6 @@ wsServer.on("connection", (ws) => {
       ws.computerId = computerId;
     }
     console.log("Message received from frontend: " + message);
-    ws.send("Message received on backend: " + message);
   });
 
   ws.on("close", () => {
@@ -107,7 +82,7 @@ wsServer.on("connection", (ws) => {
 //The following is to simulate data coming from serial stuff.
 setInterval(() => {
   simulateComputersReceivingData();
-}, 10000);
+}, 60000);
 function simulateComputersReceivingData() {
   for (var computerId in computerIdToWebsocketDict) {
     let ws = computerIdToWebsocketDict[computerId];
