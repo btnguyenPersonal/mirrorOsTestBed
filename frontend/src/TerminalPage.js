@@ -17,7 +17,7 @@ function TerminalPage({ setPage, computerId, userId }) {
   });
 
   const XTermRef = React.useRef();
-  const XTermOpt = { cursorBlink: true }
+  const XTermOpt = { cursorBlink: true };
 
   const changeHandler = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -36,18 +36,15 @@ function TerminalPage({ setPage, computerId, userId }) {
       .then((response) => response.json())
       .then((result) => {
         if (result.message !== "Successful file upload") {
-          document.getElementById("errorStatus").innerHTML =
-            "<p>" + result.message + "</p>";
+          document.getElementById("errorStatus").innerHTML = "<p>" + result.message + "</p>";
         } else {
           setFileUploaded(true);
-          document.getElementById("fileStatus").innerHTML =
-            "<p>" + result.message + "</p>";
+          document.getElementById("fileStatus").innerHTML = "<p>" + result.message + "</p>";
         }
       })
       .catch((error) => {
         setFileUploaded(true);
-        document.getElementById("fileStatus").innerHTML =
-          "<p>" + error + "</p>";
+        document.getElementById("fileStatus").innerHTML = "<p>" + error + "</p>";
       });
   };
 
@@ -58,14 +55,8 @@ function TerminalPage({ setPage, computerId, userId }) {
         {isFilePicked ? (
           <div>
             <p>Filename: {selectedFile.name}</p>
-            <p>
-              Size in bytes:{" "}
-              {(selectedFile.size / Math.pow(1000, 2)).toFixed(2)} mb
-            </p>
-            <p>
-              lastModifiedDate:{" "}
-              {selectedFile.lastModifiedDate.toLocaleDateString()}
-            </p>
+            <p>Size in bytes: {(selectedFile.size / Math.pow(1000, 2)).toFixed(2)} mb</p>
+            <p>lastModifiedDate: {selectedFile.lastModifiedDate.toLocaleDateString()}</p>
           </div>
         ) : (
           <p>Select a file to show details</p>
@@ -79,35 +70,30 @@ function TerminalPage({ setPage, computerId, userId }) {
   };
 
   async function releaseSession(isExitingPage) {
-    console.log("released session...");
-    let comp = { userId: userId, computerId: computerId };
+    let requestBody = { userId: userId, computerId: computerId };
     await fetch(`http://${process.env.REACT_APP_IP}:8080/api/releaseComputer`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(comp),
+      body: JSON.stringify(requestBody),
     }).then(async (response) => {
       ws.close();
-      if(isExitingPage) return;
+      if (isExitingPage) return;
       let json = await response.json();
       if (response.status === 200) {
         setTimeout(function () {
-            setPage("Dashboard");
-        }, 2000);
+          setPage("Dashboard");
+        }, 1000);
       } else {
-        document.getElementById("fail_message").innerHTML =
-          "<p><small>" + json.message + "</small></p>";
+        document.getElementById("fail_message").innerHTML = "<p><small>" + json.message + "</small></p>";
       }
     });
   }
 
-
-
-
   async function initWebSocket() {
     ws.onopen = () => {
-      ws.send("websocket-initialization-message:" + computerId);
+      ws.send(JSON.stringify({ messageType: "websocket-initialization-message", computerId: computerId }));
       printToTerminal("You are now in control of computerId=" + computerId);
     };
 
@@ -117,32 +103,29 @@ function TerminalPage({ setPage, computerId, userId }) {
 
     ws.onclose = () => {
       printToTerminal("Session closed. You will be redirected shortly.");
-    }
+    };
+  }
+
+  function clearTerminal() {
+    XTermRef.current.terminal.clear();
   }
 
   function printToTerminal(str) {
-    if(XTermRef.current) {
+    if (XTermRef.current) {
       XTermRef.current.terminal.write(str + "\r\n$ ");
     }
   }
-
 
   let content = (
     <div>
       {fileUploaded ? (
         <div>
-          <div id="fileStatus"></div> <br />{" "}
-          <button onClick={() => setFileUploaded(false)}>
-            Submit new File
-          </button>{" "}
+          <div id="fileStatus"></div> <br /> <button onClick={() => setFileUploaded(false)}>Submit new File</button>{" "}
           <button
             onClick={() =>
-              fetch(
-                `http://${process.env.REACT_APP_IP}:8080/api/reboot/${computerId}`,
-                {
-                  method: "POST",
-                }
-              )
+              fetch(`http://${process.env.REACT_APP_IP}:8080/api/reboot/${computerId}`, {
+                method: "POST",
+              })
             }
           >
             Reset Pi
@@ -154,8 +137,9 @@ function TerminalPage({ setPage, computerId, userId }) {
         <Upload />
       )}
 
-      <Terminal XTermOpt={XTermOpt} XTermRef={XTermRef} ws={ws}/>
+      <Terminal XTermOpt={XTermOpt} XTermRef={XTermRef} ws={ws} />
       <button onClick={() => releaseSession(false)}>Release session</button>
+      <button onClick={() => clearTerminal()}>Clear terminal</button>
     </div>
   );
   return content;

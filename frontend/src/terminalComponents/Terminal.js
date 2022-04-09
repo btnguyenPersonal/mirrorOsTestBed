@@ -1,18 +1,14 @@
-import React, {
-  useEffect
-} from 'react'
-import {
-  XTerm
-} from 'xterm-for-react'
+import React, { useEffect } from "react";
+import { XTerm } from "xterm-for-react";
 
-function Terminal({XTermOpt, XTermRef, ws}) {
+function Terminal({ XTermOpt, XTermRef, ws }) {
   let messageString = "";
 
   const onKey = (event) => {
-    if (event.key === '\r') {
-      ws.send(messageString);
+    if (event.key === "\r") {
+      ws.send(JSON.stringify({ messageType: "terminal-message", body: messageString }));
       messageString = "";
-      XTermRef.current.terminal.write('\r\n$ ');
+      XTermRef.current.terminal.write("\r\n$ ");
     } else {
       messageString += event.key;
       XTermRef.current.terminal.write(event.key);
@@ -21,11 +17,7 @@ function Terminal({XTermOpt, XTermRef, ws}) {
 
   let content = (
     <div>
-      <XTerm
-        ref = { XTermRef }
-        options = { XTermOpt }
-        onKey = { onKey }
-      />
+      <XTerm ref={XTermRef} options={XTermOpt} onKey={onKey} />
     </div>
   );
 

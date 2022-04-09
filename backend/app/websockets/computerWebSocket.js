@@ -1,8 +1,8 @@
-const webSocket = require('ws');
+const webSocket = require("ws");
 
 // create websocket server
 const wsServer = new webSocket.Server({ port: 9000 });
-// create websocket connection
+//A dictionary mapping each active computer to it's associated websocket to the user using the computer.
 var computerIdToWebsocketDict = {};
 
 // var { SerialPort, ReadlineParser } = require("serialport");
@@ -20,33 +20,31 @@ wsServer.on("connection", (ws) => {
   // });
 
   ws.on("message", (message) => {
-    message = message.toString();
-    if (message.includes("websocket-initialization-message:")) {
-      var computerId = message.split(":")[1];
+    message = JSON.parse(message.toString());
+    if (message.messageType === "websocket-initialization-message") {
+      var computerId = message.computerId;
       if (computerIdToWebsocketDict[computerId]) return;
       computerIdToWebsocketDict[computerId] = ws;
       ws.computerId = computerId;
+    } else if (message.messageType === "terminal-message") {
+      console.log("Message received from frontend terminal: " + JSON.stringify(message.body));
     }
-    console.log("Message received from frontend: " + message);
   });
 
   ws.on("close", () => {
     var computerId = ws.computerId;
     delete computerIdToWebsocketDict[computerId];
-    console.log("websocket closed from frontend.");
   });
 });
+
+function simulateComputersReceivingData() {
+  for (var computerId in computerIdToWebsocketDict) {
+    let ws = computerIdToWebsocketDict[computerId];
+    ws.send("faking some serial data every 10 seconds. This data is only being sent to computerId=" + computerId);
+  }
+}
 
 //The following is to simulate data coming from serial stuff.
 setInterval(() => {
   simulateComputersReceivingData();
 }, 60000);
-function simulateComputersReceivingData() {
-  for (var computerId in computerIdToWebsocketDict) {
-    let ws = computerIdToWebsocketDict[computerId];
-    console.log("faking some serial data every 10 seconds. This data is only being sent to computerId=" + computerId);
-    ws.send("faking some serial data every 10 seconds. This data is only being sent to computerId=" + computerId);
-  }
-}
-
-
