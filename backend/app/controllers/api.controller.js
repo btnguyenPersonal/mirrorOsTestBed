@@ -259,6 +259,8 @@ exports.useComputer = async (req, res) => {
       });
       return;
     });
+
+
   //Check if the computer is available.
   if (computer.inUse) {
     res.status(500).send({

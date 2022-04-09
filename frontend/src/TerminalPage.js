@@ -92,7 +92,9 @@ function TerminalPage({ setPage, computerId, userId }) {
       if(isExitingPage) return;
       let json = await response.json();
       if (response.status === 200) {
-        setPage("Dashboard");
+        setTimeout(function () {
+            setPage("Dashboard");
+        }, 2000);
       } else {
         document.getElementById("fail_message").innerHTML =
           "<p><small>" + json.message + "</small></p>";
@@ -104,7 +106,6 @@ function TerminalPage({ setPage, computerId, userId }) {
 
 
   async function initWebSocket() {
-
     ws.onopen = () => {
       ws.send("websocket-initialization-message:" + computerId);
       printToTerminal("You are now in control of computerId=" + computerId);
@@ -115,10 +116,8 @@ function TerminalPage({ setPage, computerId, userId }) {
     };
 
     ws.onclose = () => {
-      printToTerminal("Websocket closed.");
+      printToTerminal("Session closed. You will be redirected shortly.");
     }
-
-
   }
 
   function printToTerminal(str) {
