@@ -19,11 +19,7 @@ module.exports = (db) => {
     inUse: {
       type: Sequelize.BOOLEAN,
       defaultValue: false,
-    },
-    numUsersWaiting: {
-      type: Sequelize.INTEGER,
-      defaultValue: 0,
-    },
+    }
   });
   return Computer;
 };

@@ -5,6 +5,9 @@ module.exports = {
   CHANGED_ADMIN_PASSWORD_EVENT_ID: 4,
   SESSION_START_EVENT_ID: 5,
   SESSION_END_EVENT_ID: 6,
+  JOINED_QUEUE_EVENT_ID: 7,
+  EXITED_QUEUE_EVENT_ID: 8,
+  STATE_OF_QUEUE_LOGGING_EVENT_ID: 9,
   isBodyValid(req, res, requirements) {
     for (const [key, value] of Object.entries(requirements)) {
       if (req.body[key] == undefined) {
