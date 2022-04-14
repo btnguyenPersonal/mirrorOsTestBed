@@ -126,7 +126,7 @@ function DashComponent({ setPage, setComputerId, userId, admin }) {
         >
           Refresh Page
         </button>
-        {admin ? <div>Welcom admin</div> : <div>Welcome</div>}
+        {admin ? <div>Welcome admin</div> : <div>Welcome</div>}
         <div>OS Pi Testbed</div>
       </div>
       <div id="message_box"></div>
