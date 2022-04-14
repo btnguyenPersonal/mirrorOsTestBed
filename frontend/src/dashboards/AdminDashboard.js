@@ -6,6 +6,9 @@ function AdminDashboard({ setPage, setComputerId, userId }) {
   let content = (
     <div className="AdminDashboard">
       <DashComponent setPage={setPage} setComputerId={setComputerId} userId={userId} admin={true}/>
+      <button onClick={() => setPage("ChangePasswordForm")}>
+        Go to Change Password
+      </button>
     </div>
   );
   return content;
