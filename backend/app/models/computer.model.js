@@ -19,7 +19,7 @@ module.exports = (db) => {
     inUse: {
       type: Sequelize.BOOLEAN,
       defaultValue: false,
-    },
+    }
   });
   return Computer;
 };

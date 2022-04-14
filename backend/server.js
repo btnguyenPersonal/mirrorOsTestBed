@@ -3,8 +3,6 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
 
-const webSocket = require('ws');
-
 const swaggerUi = require("swagger-ui-express");
 const swaggerFile = require("./app/config/swagger_output.json");
 
@@ -17,17 +15,23 @@ const db = require("./app");
 
 initializeDb();
 
-// create websocket server
-const wsServer = new webSocket.Server({ port: 9000 });
+// initialize queue and computer websockets
+require("./app/websockets/queueWebSocket.js");
+require("./app/websockets/computerWebSocket.js");
+
 
 app.use(cors(corsOptions));
 // parse requests of content-type - application/json
 app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({
+  extended: true
+}));
 // simple route
 app.get("/", (req, res) => {
-  res.json({ message: "Basic app." });
+  res.json({
+    message: "Basic app."
+  });
 });
 require("./app/routes/user.routes")(app);
 require("./app/routes/eventType.routes")(app);
@@ -44,28 +48,6 @@ app.listen(PORT, () => {
 
 app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-// var {SerialPort, ReadlineParser} = require("serialport");
-// var serialPort = new SerialPort ({
-//   path: "/dev/ttyUSB0",
-//   baudRate: 115200
-// });
-// var parser = new ReadlineParser();
-// serialPort.pipe(parser);
-
-// create websocket connection
-wsServer.on('connection', ws => {
-  // send serial data through websocket
-  // parser.on('data', function(data) {
-  //   console.log(data);
-  //   ws.send(data);
-  // });
-
-  // send websocket message through serial port
-	ws.on('message', message => {
-    ws.send(message);
-		//serialPort.write(message); 
-	});
-});
 
 async function initializeDb() {
   const EventType = db.eventType;
@@ -73,29 +55,88 @@ async function initializeDb() {
   const Computer = db.computer;
   const User = db.user;
   //The following is to wipe the database everytime.
-  db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', {raw: true})
-  .then(() => db.sequelize.sync({ force: true }).then(async () => {
-    console.log("Drop and re-sync db.");
-    await User.create({ userId: 1, email: "csmith48@iastate.edu", isAdmin: 1 })
-    //Order in which event types are created matters. See utils file for correct order.
-    await EventType.create({ eventType: "login" });
-    await EventType.create({ eventType: "admin login" });
-    await EventType.create({ eventType: "changed password" });
-    await EventType.create({ eventType: "changed admin password" });
-    await EventType.create({ eventType: "session start" });
-    await EventType.create({ eventType: "session end" });
-    //Password stuff.
-    hashedPassword = await bcrypt.hash("password", 10);
-    await Password.create({ password: hashedPassword, isAdminPassword: 0 });
-    hashedPassword = await bcrypt.hash("adminpassword", 10);
-    await Password.create({ password: hashedPassword, isAdminPassword: 1 });
-    //Computer stuff. inUse is false by default.
-    await Computer.create({ portId: 2, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 3, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 4, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 5, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 6, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
-    await Computer.create({ portId: 7, serialNumber: 'e2f2ecf5', model: "Raspberry Pi 3 Model B+" });
-  })
-  )
+  db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', {
+      raw: true
+    })
+    .then(() => db.sequelize.sync({
+      force: true
+    }).then(async () => {
+      console.log("Drop and re-sync db.");
+      await User.create({
+        userId: 1,
+        email: "csmith48@iastate.edu",
+        isAdmin: 1
+      })
+      //Order in which event types are created matters. See utils file for correct order.
+      await EventType.create({
+        eventType: "login"
+      });
+      await EventType.create({
+        eventType: "admin login"
+      });
+      await EventType.create({
+        eventType: "changed password"
+      });
+      await EventType.create({
+        eventType: "changed admin password"
+      });
+      await EventType.create({
+        eventType: "session start"
+      });
+      await EventType.create({
+        eventType: "session end"
+      });
+      await EventType.create({
+        eventType: "joined queue"
+      });
+      await EventType.create({
+        eventType: "exited queue"
+      });
+      await EventType.create({
+        eventType: "state of queue logged"
+      });
+
+      //Password stuff.
+      hashedPassword = await bcrypt.hash("p", 10);
+      await Password.create({
+        password: hashedPassword,
+        isAdminPassword: 0
+      });
+      hashedPassword = await bcrypt.hash("ap", 10);
+      await Password.create({
+        password: hashedPassword,
+        isAdminPassword: 1
+      });
+      //Computer stuff. inUse is false by default.
+      await Computer.create({
+        portId: 2,
+        serialNumber: 'e2f2ecf5',
+        model: "Raspberry Pi 3 Model B+"
+      });
+      await Computer.create({
+        portId: 3,
+        serialNumber: 'e2f2ecf5',
+        model: "Raspberry Pi 3 Model B+"
+      });
+      await Computer.create({
+        portId: 4,
+        serialNumber: 'e2f2ecf5',
+        model: "Raspberry Pi 3 Model B+"
+      });
+      // await Computer.create({
+      //   portId: 5,
+      //   serialNumber: 'e2f2ecf5',
+      //   model: "Raspberry Pi 3 Model B+"
+      // });
+      // await Computer.create({
+      //   portId: 6,
+      //   serialNumber: 'e2f2ecf5',
+      //   model: "Raspberry Pi 3 Model B+"
+      // });
+      // await Computer.create({
+      //   portId: 7,
+      //   serialNumber: 'e2f2ecf5',
+      //   model: "Raspberry Pi 3 Model B+"
+      // });
+    }))
 };

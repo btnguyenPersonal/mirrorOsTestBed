@@ -2,8 +2,7 @@ module.exports = (db) => {
   var sequelize = db.sequelize;
   var Sequelize = db.Sequelize;
   const Event = sequelize.define(
-    "events",
-    {
+    "events", {
       eventId: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -15,11 +14,15 @@ module.exports = (db) => {
       userId: {
         type: Sequelize.INTEGER,
       },
-    },
-    {
+      data: {
+        type: Sequelize.STRING
+      }
+    }, {
       updatedAt: false,
     }
   );
-  Event.belongsTo(db.eventType, {foreignKey: "eventTypeId"});
+  Event.belongsTo(db.eventType, {
+    foreignKey: "eventTypeId"
+  });
   return Event;
 };

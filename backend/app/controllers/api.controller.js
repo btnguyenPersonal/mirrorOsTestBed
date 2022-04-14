@@ -82,9 +82,13 @@ exports.fileUpload = async (req, res) => {
     return;
   }
 
-  if (typeof req.file === "undefined") return res.status(400).send({ message: "No file sent" });
+  if (typeof req.file === "undefined") return res.status(400).send({
+    message: "No file sent"
+  });
 
-  res.status(200).send({ message: "Successful file upload" });
+  res.status(200).send({
+    message: "Successful file upload"
+  });
 };
 
 exports.login = async (req, res) => {
@@ -135,13 +139,17 @@ exports.login = async (req, res) => {
       where: {
         isAdminPassword: 0,
       },
-      order: [["createdAt", "DESC"]],
+      order: [
+        ["createdAt", "DESC"]
+      ],
     }),
     Password.findOne({
       where: {
         isAdminPassword: 1,
       },
-      order: [["createdAt", "DESC"]],
+      order: [
+        ["createdAt", "DESC"]
+      ],
     }),
   ]).then((modelReturn) => {
     return modelReturn.flat();
@@ -259,6 +267,8 @@ exports.useComputer = async (req, res) => {
       });
       return;
     });
+
+
   //Check if the computer is available.
   if (computer.inUse) {
     res.status(500).send({
@@ -272,7 +282,9 @@ exports.useComputer = async (req, res) => {
       userId: userId,
       endTime: null,
     },
-    order: [["startTime", "DESC"]],
+    order: [
+      ["startTime", "DESC"]
+    ],
   }).then((session) => {
     return session;
   });
@@ -296,10 +308,10 @@ exports.useComputer = async (req, res) => {
   await Event.create({
     eventTypeId: utils.SESSION_START_EVENT_ID,
     userId: userId,
-    newSession,
   });
   res.status(200).send({
     message: `Success! You are now in control of id=${computerId}`,
+    newSession
   });
 };
 
@@ -365,7 +377,9 @@ exports.releaseComputer = async (req, res) => {
       userId: userId,
       endTime: null,
     },
-    order: [["startTime", "DESC"]],
+    order: [
+      ["startTime", "DESC"]
+    ],
   }).then((session) => {
     return session;
   });

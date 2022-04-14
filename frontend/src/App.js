@@ -9,15 +9,15 @@ import ChangePasswordForm from './ChangePasswordForm';
 
 function App() {
   const [page, setPage] = useState("Login");
-  const [id, setID] = useState(-1);
+  const [computerId, setComputerId] = useState(-1);
   const [userId, setUserId] = useState(-1);
 
   return (
     <div className="App">
     {page === "Login" && <Login setPage={setPage} setUserId={setUserId} />}
-    {page === "Dashboard" && <Dashboard setPage={setPage} setID={setID} userId={userId} />}
-    {page === "AdminDashboard" && <AdminDashboard setPage={setPage} setID={setID} userId={userId} />}
-    {page === "TerminalPage" && <TerminalPage className="TerminalPage" setPage={setPage} id={id} userId={userId} />}
+    {page === "Dashboard" && <Dashboard setPage={setPage} setComputerId={setComputerId} userId={userId} />}
+    {page === "AdminDashboard" && <AdminDashboard setPage={setPage} setComputerId={setComputerId} userId={userId} />}
+    {page === "TerminalPage" && <TerminalPage className="TerminalPage" setPage={setPage} computerId={computerId} userId={userId} />}
     {page === "ChangePasswordForm" && <ChangePasswordForm setPage={setPage} userId={userId} />}
     </div>
 
