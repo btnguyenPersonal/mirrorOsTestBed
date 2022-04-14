@@ -9,8 +9,10 @@ function Terminal({ XTermOpt, XTermRef, ws }) {
     const code = event.key.charCodeAt(0);
 
     if(code === 127) {
-    messageString = messageString.slice(0, -1);
-    XTermRef.current.terminal.write("\b \b");
+      if(messageString.length>0){
+        messageString = messageString.slice(0, -1);
+        XTermRef.current.terminal.write("\b \b");
+      }
     }
 
     if (event.key === "\r") {
@@ -19,8 +21,10 @@ function Terminal({ XTermOpt, XTermRef, ws }) {
       XTermRef.current.terminal.write("\r\n$ ");
     }
     else {
-      messageString += event.key;
-      XTermRef.current.terminal.write(event.key);
+      if(code!==127){
+        messageString += event.key;
+        XTermRef.current.terminal.write(event.key);
+      }
     }
   };
 
