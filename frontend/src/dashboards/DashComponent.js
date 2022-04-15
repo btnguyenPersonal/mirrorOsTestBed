@@ -1,4 +1,4 @@
-import React, {  useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 function DashComponent({ setPage, setComputerId, userId, admin }) {
   const [list, setList] = useState(null);
@@ -112,6 +112,27 @@ function DashComponent({ setPage, setComputerId, userId, admin }) {
     });
   }
 
+  function deleteComputer(computerId) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete the computer with id=" + computerId + "?"
+    );
+    if (confirmed) {
+      let requestBody = { userId: userId, computerId: computerId };
+      fetch(`http://${process.env.REACT_APP_IP}:8080/api/computerDestroy`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }).then(async (response) => {
+        let json = await response.json();
+        document.getElementById("message_box").innerHTML =
+          "<p><small>" + json.message + "</small></p>";
+        loadData();
+      });
+    }
+  }
+
   let content = (
     <nav>
       <div
@@ -134,6 +155,15 @@ function DashComponent({ setPage, setComputerId, userId, admin }) {
         <ul>
           {list.map((item) => (
             <li key={item.computerId}>
+              {admin && (
+                <button
+                  style={{ backgroundColor: `#E68E8E` }}
+                  onClick={() => deleteComputer(item.computerId)}
+                >
+                  Delete Computer
+                </button>
+              )}
+              {admin && <br />}
               Computer ID: {item.computerId} | Computer Type: {item.model}
               {queue
                 ? ` | Users in Queue: ${JSON.stringify(

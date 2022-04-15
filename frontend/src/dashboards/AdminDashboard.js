@@ -9,6 +9,10 @@ function AdminDashboard({ setPage, setComputerId, userId }) {
       <button onClick={() => setPage("ChangePasswordForm")}>
         Go to Change Password
       </button>
+      <br />
+      <button onClick={() => setPage("ChangePasswordForm")}>
+        Add new Computers
+      </button>
     </div>
   );
   return content;

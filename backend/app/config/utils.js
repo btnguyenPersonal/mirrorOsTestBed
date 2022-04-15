@@ -8,6 +8,8 @@ module.exports = {
   JOINED_QUEUE_EVENT_ID: 7,
   EXITED_QUEUE_EVENT_ID: 8,
   STATE_OF_QUEUE_LOGGING_EVENT_ID: 9,
+  COMPUTER_CREATED_EVENT_ID: 10,
+  COMPUTER_DELETED_EVENT_ID: 11,
   isBodyValid(req, res, requirements) {
     for (const [key, value] of Object.entries(requirements)) {
       if (req.body[key] == undefined) {

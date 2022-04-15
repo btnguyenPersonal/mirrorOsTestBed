@@ -95,6 +95,12 @@ async function initializeDb() {
       await EventType.create({
         eventType: "state of queue logged"
       });
+      await EventType.create({
+        eventType: "computer added"
+      });
+      await EventType.create({
+        eventType: "computer deleted"
+      });
 
       //Password stuff.
       hashedPassword = await bcrypt.hash("p", 10);
