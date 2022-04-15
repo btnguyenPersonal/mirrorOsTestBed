@@ -69,7 +69,6 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
   }
 
   async function joinQueue(computerId) {
-    console.log("hi");
     qws.send(
       JSON.stringify({ messageType: "join-queue", computerId: computerId })
     );
