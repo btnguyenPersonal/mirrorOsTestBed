@@ -19,4 +19,12 @@ module.exports = {
     }
     return true;
   },
+  isMessageValid(data, requirements) {
+    for (const [key] of Object.entries(requirements)) {
+      if (data[key] == undefined) {
+        return false;
+      }
+    }
+    return true;
+  }
 };
