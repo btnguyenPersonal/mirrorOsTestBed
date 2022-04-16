@@ -28,7 +28,7 @@ exports.uploader = async (req, res, next) => {
 		if(file.mimetype === 'application/octet-stream')
 			cb(null, true);
 		else
-			cb(new Error, false);
+			cb(new Error('Unsupported file type'), false);
 	};
 	
 	var upload = multer({
@@ -47,6 +47,6 @@ exports.uploader = async (req, res, next) => {
 		else if(err instanceof multer.MulterError)
 			return res.status(500).send({ message: 'File upload error' });
 		else
-			return res.status(400).send({ message: 'Unsupported file type' });
+			return res.status(400).send({ message: err.message });
 	});
 };
