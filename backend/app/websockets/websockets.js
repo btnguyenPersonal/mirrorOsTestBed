@@ -4,6 +4,7 @@ const db = require("..");
 const Computer = db.computer;
 const Session = db.session;
 const Event = db.event;
+const User = db.user;
 
 const utils = require("../config/utils.js");
 
@@ -57,6 +58,15 @@ wsServerForQueue.on("connection", (ws) => {
       }
       //Remove the user from the computer queues they wanted to exit.
       await exitQueue(ws.userId, computerId);
+    } else if (message.messageType === "admin-kick-user-off-computer") {
+      if(!utils.isMessageValid(message, {adminUserId: "", computerId: ""})) return; 
+      await handleKickUserOffComputer(message);
+    } else if (message.messageType === "admin-join-front-of-queue") {
+      if(!utils.isMessageValid(message, {adminUserId: "", computerId: ""})) return; 
+      await handleJoinFrontOfQueue(message);
+    } else if (message.messageType === "admin-clear-queue") {
+      if(!utils.isMessageValid(message, {adminUserId: "", computerId: ""})) return; 
+      await handleClearQueue(message);
     }
   });
 
@@ -72,6 +82,46 @@ wsServerForQueue.on("connection", (ws) => {
   });
 });
 
+async function handleKickUserOffComputer(message) {
+  var adminUserId = message.adminUserId;
+  var computerId = message.computerId;
+  if(!(await isUserAdmin(adminUserId))) return;
+  var wsToKick = computerIdToWebsocketDict[computerId]
+  if(!wsToKick) return;
+  await wsToKick.send(JSON.stringify({
+    messageType: "admin-kicked-user"
+  }));
+  await updateAllQueueUsers();
+  //log event
+}
+
+async function handleJoinFrontOfQueue(message) {
+  var adminUserId = message.adminUserId;
+  var computerId = message.computerId;
+  if(!(await isUserAdmin(adminUserId))) return;
+  await joinFrontOfQueue(adminUserId, computerId);
+}
+
+async function handleClearQueue(message) {
+  var adminUserId = message.adminUserId;
+  var computerId = message.computerId;
+  if(!(await isUserAdmin(adminUserId))) return;
+  await clearQueue(computerId);
+}
+
+async function clearQueue(computerId) {
+  specificQueue = queue[computerId].map((x) => x);
+  for(var userId of specificQueue) {
+    await exitQueue(userId, computerId);
+  }
+}
+
+async function isUserAdmin(userId) {
+  sqlUser = await User.findByPk(userId);
+  if(!sqlUser) return false;
+  return sqlUser.isAdmin;
+}
+
 //Give updated queue data to all users waiting in a queue.
 async function updateAllQueueUsers() {
   for (const [userId] of Object.entries(userIdToWebsocketDict)) {
@@ -83,7 +133,7 @@ async function updateAllQueueUsers() {
 async function sendQueueDataToWebsocket(ws) {
   await ws.send(JSON.stringify({
     messageType: "queue-data",
-    queue: queue
+    queue: queue,
   }));
 }
 
@@ -114,20 +164,35 @@ async function exitQueue(userId, computerId) {
   computersToExit = await getComputersToJoinOrExit(computerId);
   //For each computer in the computers to join, add the user to the respective computer queue.
   for (var computerId of computersToExit) {
-    if (queue[computerId] && queue[computerId].includes(userId)) {
-      await Event.create({
-        eventTypeId: utils.EXITED_QUEUE_EVENT_ID,
-        userId: userId,
-        data: JSON.stringify({
-          queueComputerId: computerId,
-          numUsersWaiting: queue[computerId].length
-        }),
-      });
+    if (queue[computerId] != undefined && queue[computerId].includes(userId)) {
       queue[computerId].splice(queue[computerId].indexOf(userId), 1);
+      await createQueueEvent(userId, computerId, utils.EXITED_QUEUE_EVENT_ID);
     }
   }
   //Inform all users the queues have been updated.
   await updateAllQueueUsers();
+}
+
+async function joinFrontOfQueue(userId, computerId) {
+  if (!queue[computerId]) {
+    queue[computerId] = [];
+  }
+  if (!queue[computerId].includes(userId)) {
+    queue[computerId].unshift(userId);
+    await createQueueEvent(userId, computerId, utils.JOINED_QUEUE_EVENT_ID);
+  }
+  await updateAllQueueUsers();
+}
+
+async function createQueueEvent(userId, computerId, eventTypeId) {
+  await Event.create({
+    eventTypeId: eventTypeId,
+    userId: userId,
+    data: JSON.stringify({
+      queueComputerId: computerId,
+      numUsersWaiting: queue[computerId].length
+    }),
+  });
 }
 
 async function joinQueue(userId, computerId) {
@@ -162,15 +227,8 @@ async function joinQueue(userId, computerId) {
       queue[computerId] = [];
     }
     if (!queue[computerId].includes(userId)) {
-      await Event.create({
-        eventTypeId: utils.JOINED_QUEUE_EVENT_ID,
-        userId: userId,
-        data: JSON.stringify({
-          queueComputerId: computerId,
-          numUsersWaiting: queue[computerId].length
-        }),
-      });
       queue[computerId].push(userId);
+      await createQueueEvent(userId, computerId, utils.JOINED_QUEUE_EVENT_ID);
     }
   }
   //Inform all users the queues have been updated.
@@ -211,4 +269,78 @@ setInterval(() => {
 //Log state of computers queue every minute.
 setInterval(() => {
   logStateOfQueue();
+}, 60000);
+
+
+
+
+
+
+//LEARN TO SEPERATE IN FUTURE:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// create websocket server
+const wsServer = new webSocket.Server({ port: 9000 });
+//A dictionary mapping each active computer to it's associated websocket to the user using the computer.
+var computerIdToWebsocketDict = {};
+
+// var { SerialPort, ReadlineParser } = require("serialport");
+// var serialPort = new SerialPort({
+//   path: "/dev/ttyUSB0",
+//   baudRate: 115200,
+// });
+
+wsServer.on("connection", (ws) => {
+  // var parser = new ReadlineParser();
+  // serialPort.pipe(parser);
+  // parser.on("data", function (data) {
+  //   console.log("data from serial: " + data);
+  //   ws.send(data);
+  // });
+
+  ws.on("message", (message) => {
+    message = JSON.parse(message.toString());
+    if (message.messageType === "websocket-initialization-message") {
+      var computerId = message.computerId;
+      if (computerIdToWebsocketDict[computerId]) return;
+      computerIdToWebsocketDict[computerId] = ws;
+      ws.computerId = computerId;
+    } else if (message.messageType === "terminal-message") {
+      console.log("Message received from frontend terminal: " + JSON.stringify(message.body));
+    }
+  });
+
+  ws.on("close", () => {
+    var computerId = ws.computerId;
+    delete computerIdToWebsocketDict[computerId];
+  });
+});
+
+function simulateComputersReceivingData() {
+  for (var computerId in computerIdToWebsocketDict) {
+    let ws = computerIdToWebsocketDict[computerId];
+    ws.send("faking some serial data every 10 seconds. This data is only being sent to computerId=" + computerId);
+  }
+}
+
+//The following is to simulate data coming from serial stuff.
+setInterval(() => {
+  simulateComputersReceivingData();
 }, 60000);

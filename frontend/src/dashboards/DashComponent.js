@@ -7,6 +7,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
   const [loaded, setLoaded] = useState(false);
 
   var [queue, setQueue] = useState(null);
+  var [computersInUse, setComputersInUse] = useState(null);
 
   React.useEffect(() => {
     initWebSocket();
@@ -60,6 +61,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
           "<p><small>" + message.body + "</small></p>";
       } else if (message.messageType === "queue-data") {
         setQueue(message.queue);
+        setComputersInUse(message.computersInUse);
       }
     };
 
@@ -96,6 +98,33 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
     } else {
       return "Not in queue for computerId=" + computerId;
     }
+  }
+
+  function kickUserOffComputer(computerId) {
+    qws.send(JSON.stringify({
+      messageType: "admin-kick-user-off-computer",
+      adminUserId: userId,
+      computerId: computerId
+    }));
+    setTimeout(function () {
+      loadData();
+    }, 300);
+  }
+
+  function joinFrontOfQueue(computerId) {
+    qws.send(JSON.stringify({
+      messageType: "admin-join-front-of-queue",
+      adminUserId: userId,
+      computerId: computerId
+    }));
+  }
+
+  function clearQueue(computerId) {
+    qws.send(JSON.stringify({
+      messageType: "admin-clear-queue",
+      adminUserId: userId,
+      computerId: computerId
+    }));
   }
 
   function obtainComputer(computerId) {
@@ -178,6 +207,26 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
               ) : (
                 ""
               )}
+              {isAdmin ? (
+                <div>
+                <button
+                  style={{ backgroundColor: `#7EC8E3` }}
+                  onClick={() => kickUserOffComputer(item.computerId)}>
+                  KICK USER OFF COMPUTER
+                </button>
+                <button
+                  style={{ backgroundColor: `#7EC8E3` }}
+                  onClick={() => joinFrontOfQueue(item.computerId)}>
+                  JOIN FRONT OF QUEUE
+                </button>
+                <button
+                  style={{ backgroundColor: `#7EC8E3` }}
+                  onClick={() => clearQueue(item.computerId)}>
+                  CLEAR QUEUE
+                </button>
+              </div>
+                ) : ""
+              } 
             </li>
           ))}
         </ul>

@@ -16,9 +16,7 @@ const db = require("./app");
 initializeDb();
 
 // initialize queue and computer websockets
-require("./app/websockets/queueWebSocket.js");
-require("./app/websockets/computerWebSocket.js");
-
+require("./app/websockets/websockets.js");
 
 app.use(cors(corsOptions));
 // parse requests of content-type - application/json

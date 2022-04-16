@@ -3,7 +3,7 @@ import { XTerm } from "xterm-for-react";
 
 var ws;
 
-function Terminal({ setPage, computerId, userId }) {
+function Terminal({ setPage, computerId, userId, isAdmin }) {
   let messageString = "";
 
   const XTermRef = React.useRef();
@@ -31,7 +31,11 @@ function Terminal({ setPage, computerId, userId }) {
       let json = await response.json();
       if (response.status === 200) {
         setTimeout(function () {
-          setPage("Dashboard");
+          if(isAdmin) {
+            setPage("AdminDashboard")
+          } else {
+            setPage("Dashboard");
+          }
         }, 1000);
       } else {
         document.getElementById("fail_message").innerHTML = "<p><small>" + json.message + "</small></p>";
@@ -48,7 +52,12 @@ function Terminal({ setPage, computerId, userId }) {
     };
 
     ws.onmessage = (messageFromBackend) => {
-      printToTerminal(messageFromBackend.data);
+      var message = JSON.parse(messageFromBackend.data.toString());
+      if(message.messageType === "admin-kicked-user") {
+        releaseSession(false);
+      } else {
+        printToTerminal(message);
+      }
     };
 
     ws.onclose = () => {
