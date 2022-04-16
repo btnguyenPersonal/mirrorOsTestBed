@@ -25,23 +25,36 @@ async function initQueue() {
   }
 }
 
-wsServerForQueue.on("connection", async (ws) => {
+wsServerForQueue.on("connection", (ws) => {
   ws.on("message", async (message) => {
     message = JSON.parse(message.toString());
+    if(!utils.isMessageValid(message, {messageType: ""})) return;
     if (message.messageType === "websocket-queue-initialization-message") {
+      if(!utils.isMessageValid(message, {userId: ""})) return;
       var userId = message.userId;
       //If this user doesn't have a websocket associated with them, add them to the dictionary.
-      if (!userIdToWebsocketDict[userId]) {
-        userIdToWebsocketDict[userId] = ws;
-        ws.userId = userId;
-      }
-      sendQueueDataToWebsocket(ws);
+      if (userIdToWebsocketDict[userId]) return;
+      userIdToWebsocketDict[userId] = ws;
+      ws.userId = userId;
+      await sendQueueDataToWebsocket(ws);
     } else if(message.messageType === "join-queue") {
+      if(!utils.isMessageValid(message, {computerId: ""})) return;
       var computerId = message.computerId;
+      var userId = ws.userId;
+      if(userId == undefined) {
+        console.log("A websocket does not have a userId associated. This is a problem. join-queue");
+        return;
+      }
       //Add the user to the computer queues they wanted to join.
-      await joinQueue(ws.userId, computerId);
+      await joinQueue(userId, computerId);
     } else if (message.messageType === "exit-queue") {
+      if(!utils.isMessageValid(message, {computerId: ""})) return;
       var computerId = message.computerId;
+      var userId = ws.userId;
+      if(userId == undefined) {
+        console.log("A websocket does not have a userId associated. This is a problem. exit-queue");
+        return;
+      }
       //Remove the user from the computer queues they wanted to exit.
       await exitQueue(ws.userId, computerId);
     }
@@ -50,21 +63,25 @@ wsServerForQueue.on("connection", async (ws) => {
   //This gets called when the user closes out or is granted a computer.
   ws.on("close", async () => {
     var userId = ws.userId;
-    await exitQueue(userId, "all")
+    if(userId == undefined) {
+      console.log("A websocket does not have a userId associated. This is a problem. close");
+      return;
+    }
+    await exitQueue(userId, "all");
     delete userIdToWebsocketDict[userId];
   });
 });
 
 //Give updated queue data to all users waiting in a queue.
-function updateAllQueueUsers() {
+async function updateAllQueueUsers() {
   for (const [userId] of Object.entries(userIdToWebsocketDict)) {
     let ws = userIdToWebsocketDict[userId];
-    sendQueueDataToWebsocket(ws);
+    await sendQueueDataToWebsocket(ws);
   }
 }
 
-function sendQueueDataToWebsocket(ws) {
-  ws.send(JSON.stringify({
+async function sendQueueDataToWebsocket(ws) {
+  await ws.send(JSON.stringify({
     messageType: "queue-data",
     queue: queue
   }));
@@ -73,11 +90,10 @@ function sendQueueDataToWebsocket(ws) {
 //Grant a user a computer they were waiting for. We do this by sending them a message which instructs the frontend to move to the TerminalPage.
 async function giveComputerToUser(computerId, userId) {
   let ws = userIdToWebsocketDict[userId];
-  ws.send(JSON.stringify({
+  await ws.send(JSON.stringify({
     messageType: "granted-computer",
     computerId: computerId
   }));
-  await ws.close(); //Close will remove this user from all queues.
 }
 
 async function getComputersToJoinOrExit(computerId) {
@@ -99,10 +115,6 @@ async function exitQueue(userId, computerId) {
   //For each computer in the computers to join, add the user to the respective computer queue.
   for (var computerId of computersToExit) {
     if (queue[computerId] && queue[computerId].includes(userId)) {
-      //DELETE IF THIS WORKS OUT
-      // var computer = await Computer.findByPk(computerId);
-      // computer.numUsersWaiting -= 1;
-      // await computer.save();
       await Event.create({
         eventTypeId: utils.EXITED_QUEUE_EVENT_ID,
         userId: userId,
@@ -119,6 +131,7 @@ async function exitQueue(userId, computerId) {
 }
 
 async function joinQueue(userId, computerId) {
+  if(userId == undefined) return;
   computersToJoin = await getComputersToJoinOrExit(computerId);
   //See if they already have a session.
   let session = await Session.findOne({
@@ -134,7 +147,7 @@ async function joinQueue(userId, computerId) {
   });
   if (session) {
     let ws = userIdToWebsocketDict[userId];
-    ws.send(
+    await ws.send(
       JSON.stringify({
         messageType: "message-to-display",
         body: "You cannot join a queue when you already have a computer. You currently already have computerId=" + session.computerId,
@@ -149,10 +162,6 @@ async function joinQueue(userId, computerId) {
       queue[computerId] = [];
     }
     if (!queue[computerId].includes(userId)) {
-      //DELETE IF THIS WORKS OUT
-      // var computer = await Computer.findByPk(computerId);
-      // computer.numUsersWaiting += 1;
-      // await computer.save();
       await Event.create({
         eventTypeId: utils.JOINED_QUEUE_EVENT_ID,
         userId: userId,
@@ -178,6 +187,7 @@ async function checkForOpenComputers() {
       if (queue[computerId] && queue[computerId].length > 0) {
         userId = queue[computerId][0];
         await giveComputerToUser(computerId, userId);
+        await exitQueue(userId, "all");
       }
     }
   }

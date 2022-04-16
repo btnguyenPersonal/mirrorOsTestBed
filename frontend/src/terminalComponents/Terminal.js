@@ -1,8 +1,70 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { XTerm } from "xterm-for-react";
 
-function Terminal({ XTermOpt, XTermRef, ws }) {
+var ws;
+
+function Terminal({ setPage, computerId, userId }) {
   let messageString = "";
+
+  const XTermRef = React.useRef();
+  const XTermOpt = { cursorBlink: true };
+
+  React.useEffect(() => {
+    initWebSocket();
+    window.onbeforeunload = () => releaseSession(true);
+    return () => {
+      window.removeEventListener("beforeunload", () => {});
+    };
+  }, []);
+
+  async function releaseSession(isExitingPage) {
+    let requestBody = { userId: userId, computerId: computerId };
+    await fetch(`http://${process.env.REACT_APP_IP}:8080/api/releaseComputer`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    }).then(async (response) => {
+      ws.close();
+      if (isExitingPage) return;
+      let json = await response.json();
+      if (response.status === 200) {
+        setTimeout(function () {
+          setPage("Dashboard");
+        }, 1000);
+      } else {
+        document.getElementById("fail_message").innerHTML = "<p><small>" + json.message + "</small></p>";
+      }
+    });
+  }
+
+  async function initWebSocket() {
+    ws = new WebSocket(`ws://${process.env.REACT_APP_IP}:9000`);
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ messageType: "websocket-initialization-message", computerId: computerId }));
+      printToTerminal("You are now in control of computerId=" + computerId);
+    };
+
+    ws.onmessage = (messageFromBackend) => {
+      printToTerminal(messageFromBackend.data);
+    };
+
+    ws.onclose = () => {
+      printToTerminal("Session closed. You will be redirected shortly.");
+    };
+  }
+
+  function clearTerminal() {
+    XTermRef.current.terminal.clear();
+  }
+
+  function printToTerminal(str) {
+    if (XTermRef.current) {
+      XTermRef.current.terminal.write(str + "\r\n$ ");
+    }
+  }
 
   const onKey = (event) => {
 
@@ -21,7 +83,7 @@ function Terminal({ XTermOpt, XTermRef, ws }) {
       XTermRef.current.terminal.write("\r\n$ ");
     }
     else {
-      if(code!==127){
+      if(code !== 127){
         messageString += event.key;
         XTermRef.current.terminal.write(event.key);
       }
@@ -31,6 +93,8 @@ function Terminal({ XTermOpt, XTermRef, ws }) {
   let content = (
     <div>
       <XTerm ref={XTermRef} options={XTermOpt} onKey={onKey} />
+      <button onClick={() => releaseSession(false)}>Release session</button>
+      <button onClick={() => clearTerminal()}>Clear terminal</button>
     </div>
   );
 
