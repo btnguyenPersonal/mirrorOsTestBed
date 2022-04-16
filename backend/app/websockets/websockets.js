@@ -11,10 +11,13 @@ const utils = require("../config/utils.js");
 const wsServerForQueue = new webSocket.Server({
   port: 9001
 });
-//A dictionary mapping userIds to their associated websocket.
-const userIdToWebsocketDict = {};
+//A dictionary mapping wsIds to their associated websocket.
+const wsIdToWebsocketDict = {};
+//A dictionary mapping userIds to their open websockets list.
+const userIdToWsIdListDict = {};
 //A dictionary mapping computerIds to it's associated queue of users waiting for it to become available.
 var queue = {};
+var globalWsId = 1;
 initQueue();
 
 async function initQueue() {
@@ -33,37 +36,38 @@ wsServerForQueue.on("connection", (ws) => {
     if (message.messageType === "websocket-queue-initialization-message") {
       if(!utils.isMessageValid(message, {userId: ""})) return;
       var userId = message.userId;
-      //If this user doesn't have a websocket associated with them, add them to the dictionary.
-      if (userIdToWebsocketDict[userId]) return;
-      userIdToWebsocketDict[userId] = ws;
+      var wsId = "ws" + globalWsId++;
+      if(wsIdToWebsocketDict[wsId]) return;
       ws.userId = userId;
+      ws.id = wsId;
+      wsIdToWebsocketDict[wsId] = ws;
+      if(userIdToWsIdListDict[userId] == undefined) {
+        userIdToWsIdListDict[userId] = [];
+      } 
+      userIdToWsIdListDict[userId].push(wsId);
+      await initializeWebsocket(ws);
       await sendQueueDataToWebsocket(ws);
     } else if(message.messageType === "join-queue") {
       if(!utils.isMessageValid(message, {computerId: ""})) return;
       var computerId = message.computerId;
       var userId = ws.userId;
-      if(userId == undefined) {
-        console.log("A websocket does not have a userId associated. This is a problem. join-queue");
-        return;
-      }
+      if(ws.id == undefined) return;
+      wsId = ws.id;
       //Add the user to the computer queues they wanted to join.
-      await joinQueue(userId, computerId);
+      await joinQueue(userId, computerId, wsId);
     } else if (message.messageType === "exit-queue") {
       if(!utils.isMessageValid(message, {computerId: ""})) return;
       var computerId = message.computerId;
       var userId = ws.userId;
-      if(userId == undefined) {
-        console.log("A websocket does not have a userId associated. This is a problem. exit-queue");
-        return;
-      }
+      if(ws.id == undefined) return;
       //Remove the user from the computer queues they wanted to exit.
-      await exitQueue(ws.userId, computerId);
+      await exitQueue(userId, computerId);
     } else if (message.messageType === "admin-kick-user-off-computer") {
       if(!utils.isMessageValid(message, {adminUserId: "", computerId: ""})) return; 
       await handleKickUserOffComputer(message);
     } else if (message.messageType === "admin-join-front-of-queue") {
       if(!utils.isMessageValid(message, {adminUserId: "", computerId: ""})) return; 
-      await handleJoinFrontOfQueue(message);
+      await handleJoinFrontOfQueue(message, ws.id);
     } else if (message.messageType === "admin-clear-queue") {
       if(!utils.isMessageValid(message, {adminUserId: "", computerId: ""})) return; 
       await handleClearQueue(message);
@@ -73,14 +77,19 @@ wsServerForQueue.on("connection", (ws) => {
   //This gets called when the user closes out or is granted a computer.
   ws.on("close", async () => {
     var userId = ws.userId;
-    if(userId == undefined) {
-      console.log("A websocket does not have a userId associated. This is a problem. close");
-      return;
-    }
+    if(ws.id == undefined) return;
     await exitQueue(userId, "all");
-    delete userIdToWebsocketDict[userId];
+    userIdToWsIdListDict[userId].splice(userIdToWsIdListDict[userId].indexOf(ws.id), 1);
+    delete wsIdToWebsocketDict[ws.id];
   });
 });
+
+async function initializeWebsocket(ws) {
+  await ws.send(JSON.stringify({
+    messageType: "initialize-websocket",
+    wsId: ws.id,
+  }));
+}
 
 async function handleKickUserOffComputer(message) {
   var adminUserId = message.adminUserId;
@@ -92,21 +101,24 @@ async function handleKickUserOffComputer(message) {
     messageType: "admin-kicked-user"
   }));
   await updateAllQueueUsers();
-  //log event
+  await createEvent(utils.ADMIN_KICKED_USER_OFF_COMP_EVENT_ID, adminUserId, { userKickedOff: wsToKick.userId })
 }
 
-async function handleJoinFrontOfQueue(message) {
+async function handleJoinFrontOfQueue(message, wsId) {
   var adminUserId = message.adminUserId;
   var computerId = message.computerId;
   if(!(await isUserAdmin(adminUserId))) return;
-  await joinFrontOfQueue(adminUserId, computerId);
+  await joinFrontOfQueue(adminUserId, computerId, wsId);
+  await createEvent(utils.ADMIN_JOINED_FRONT_OF_QUEUE_EVENT_ID, adminUserId, { numUsersSkipped: queue[computerId].length-1 })
 }
 
 async function handleClearQueue(message) {
   var adminUserId = message.adminUserId;
   var computerId = message.computerId;
   if(!(await isUserAdmin(adminUserId))) return;
+  var numUsersCleared = queue[computerId].length;
   await clearQueue(computerId);
+  await createEvent(utils.ADMIN_CLEARED_QUEUE_EVENT_ID, adminUserId, { numUsersCleared: numUsersCleared })
 }
 
 async function clearQueue(computerId) {
@@ -124,9 +136,9 @@ async function isUserAdmin(userId) {
 
 //Give updated queue data to all users waiting in a queue.
 async function updateAllQueueUsers() {
-  for (const [userId] of Object.entries(userIdToWebsocketDict)) {
-    let ws = userIdToWebsocketDict[userId];
-    await sendQueueDataToWebsocket(ws);
+  for (const [wsId] of Object.entries(wsIdToWebsocketDict)) {
+      let ws = wsIdToWebsocketDict[wsId];
+      await sendQueueDataToWebsocket(ws);
   }
 }
 
@@ -138,8 +150,8 @@ async function sendQueueDataToWebsocket(ws) {
 }
 
 //Grant a user a computer they were waiting for. We do this by sending them a message which instructs the frontend to move to the TerminalPage.
-async function giveComputerToUser(computerId, userId) {
-  let ws = userIdToWebsocketDict[userId];
+async function giveComputerToWebsocket(computerId, wsId) {
+  let ws = wsIdToWebsocketDict[wsId];
   await ws.send(JSON.stringify({
     messageType: "granted-computer",
     computerId: computerId
@@ -173,29 +185,35 @@ async function exitQueue(userId, computerId) {
   await updateAllQueueUsers();
 }
 
-async function joinFrontOfQueue(userId, computerId) {
+async function joinFrontOfQueue(userId, computerId, wsId) {
   if (!queue[computerId]) {
     queue[computerId] = [];
   }
   if (!queue[computerId].includes(userId)) {
     queue[computerId].unshift(userId);
+    await prioritizeWebsocket(wsId);
     await createQueueEvent(userId, computerId, utils.JOINED_QUEUE_EVENT_ID);
   }
   await updateAllQueueUsers();
 }
 
 async function createQueueEvent(userId, computerId, eventTypeId) {
+  data = {
+    queueComputerId: computerId,
+    numUsersWaiting: queue[computerId].length
+  };
+  await createEvent(eventTypeId, userId, data)
+}
+
+async function createEvent(eventTypeId, userId, data) {
   await Event.create({
     eventTypeId: eventTypeId,
     userId: userId,
-    data: JSON.stringify({
-      queueComputerId: computerId,
-      numUsersWaiting: queue[computerId].length
-    }),
+    data: JSON.stringify(data),
   });
 }
 
-async function joinQueue(userId, computerId) {
+async function joinQueue(userId, computerId, wsId) {
   if(userId == undefined) return;
   let user = await User.findByPk(userId);
   computersToJoin = await getComputersToJoinOrExit(computerId);
@@ -212,7 +230,7 @@ async function joinQueue(userId, computerId) {
     return session;
   });
   if (session && !user.isAdmin) {
-    let ws = userIdToWebsocketDict[userId];
+    let ws = wsIdToWebsocketDict[wsId];
     await ws.send(
       JSON.stringify({
         messageType: "message-to-display",
@@ -229,11 +247,18 @@ async function joinQueue(userId, computerId) {
     }
     if (!queue[computerId].includes(userId)) {
       queue[computerId].push(userId);
+      await prioritizeWebsocket(userId, wsId);
       await createQueueEvent(userId, computerId, utils.JOINED_QUEUE_EVENT_ID);
     }
   }
   //Inform all users the queues have been updated.
   await updateAllQueueUsers();
+}
+
+async function prioritizeWebsocket(userId, wsId) {
+  if(!userIdToWsIdListDict[userId]) return;
+  userIdToWsIdListDict[userId].splice(userIdToWsIdListDict[userId].indexOf(wsId), 1);
+  userIdToWsIdListDict[userId].unshift(wsId);
 }
 
 //Looks through the computers table and if one is available, it grants access to the first user in the queue.
@@ -243,10 +268,13 @@ async function checkForOpenComputers() {
     computerId = computer.computerId;
     if (!computer.inUse) {
       //If there is a queue and it has users in it, then give the computer to the first user.
-      if (queue[computerId] && queue[computerId].length > 0) {
+      if (queue[computerId] && queue[computerId].length > 0 ){
         userId = queue[computerId][0];
-        await giveComputerToUser(computerId, userId);
-        await exitQueue(userId, "all");
+        if(userIdToWsIdListDict[userId] && userIdToWsIdListDict[userId].length > 0) {
+          wsId = userIdToWsIdListDict[userId][0];
+          await giveComputerToWebsocket(computerId, wsId);
+          await exitQueue(userId, "all");
+        }
       }
     }
   }

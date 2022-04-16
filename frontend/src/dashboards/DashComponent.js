@@ -1,13 +1,13 @@
 import React, {  useState, useEffect } from "react";
 
 var qws;
+var wsIdDebug = "empty";
 
 function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
   const [list, setList] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
   var [queue, setQueue] = useState(null);
-  var [computersInUse, setComputersInUse] = useState(null);
 
   React.useEffect(() => {
     initWebSocket();
@@ -54,14 +54,16 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
       loadData();
       //Convert the message to an object we can easily work with.
       var message = JSON.parse(messageFromBackend.data.toString());
-      if (message.messageType === "granted-computer") {
+      if (message.messageType === "initialize-websocket") {
+        qws.id = message.wsId;
+        wsIdDebug = message.wsId;
+      } else if (message.messageType === "granted-computer") {
         obtainComputer(message.computerId);
       } else if (message.messageType === "message-to-display") {
         document.getElementById("message_box").innerHTML =
           "<p><small>" + message.body + "</small></p>";
       } else if (message.messageType === "queue-data") {
         setQueue(message.queue);
-        setComputersInUse(message.computersInUse);
       }
     };
 
@@ -236,6 +238,9 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
       <button onClick={() => joinQueue("all")}>JOIN ALL QUEUES </button>
       <button onClick={() => exitQueue("all")}>EXIT ALL QUEUES </button>
       <div id="queue-state"> QUEUE STATE: {JSON.stringify(queue)}</div>
+      <br/>
+      <div id="user"> USER ID: {userId}</div>
+      <div id="wsId"> WS ID: {wsIdDebug}</div>
     </nav>
   );
 

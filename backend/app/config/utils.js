@@ -8,6 +8,9 @@ module.exports = {
   JOINED_QUEUE_EVENT_ID: 7,
   EXITED_QUEUE_EVENT_ID: 8,
   STATE_OF_QUEUE_LOGGING_EVENT_ID: 9,
+  ADMIN_KICKED_USER_OFF_COMP_EVENT_ID: 10,
+  ADMIN_JOINED_FRONT_OF_QUEUE_EVENT_ID: 11,
+  ADMIN_CLEARED_QUEUE_EVENT_ID: 12,
   isBodyValid(req, res, requirements) {
     for (const [key, value] of Object.entries(requirements)) {
       if (req.body[key] == undefined) {

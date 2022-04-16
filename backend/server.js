@@ -95,6 +95,15 @@ async function initializeDb() {
       await EventType.create({
         eventType: "state of queue logged"
       });
+      await EventType.create({
+        eventType: "admin kicked user off computer"
+      });
+      await EventType.create({
+        eventType: "admin joined front of queue"
+      });
+      await EventType.create({
+        eventType: "admin cleared queue"
+      });
       //Switch stuff?
       await Switch.create({ ipAddress: "192.168.1.140", username: "ostestbed", password: "05testbed!" });
       //Password stuff.
