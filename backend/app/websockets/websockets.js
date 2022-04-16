@@ -197,6 +197,7 @@ async function createQueueEvent(userId, computerId, eventTypeId) {
 
 async function joinQueue(userId, computerId) {
   if(userId == undefined) return;
+  let user = await User.findByPk(userId);
   computersToJoin = await getComputersToJoinOrExit(computerId);
   //See if they already have a session.
   let session = await Session.findOne({
@@ -210,7 +211,7 @@ async function joinQueue(userId, computerId) {
   }).then((session) => {
     return session;
   });
-  if (session) {
+  if (session && !user.isAdmin) {
     let ws = userIdToWebsocketDict[userId];
     await ws.send(
       JSON.stringify({
@@ -336,11 +337,14 @@ wsServer.on("connection", (ws) => {
 function simulateComputersReceivingData() {
   for (var computerId in computerIdToWebsocketDict) {
     let ws = computerIdToWebsocketDict[computerId];
-    ws.send("faking some serial data every 10 seconds. This data is only being sent to computerId=" + computerId);
+    ws.send(JSON.stringify({
+      messageType: "terminal-message", 
+      text: "faking some serial data every 10 seconds. This data is only being sent to computerId=" + computerId
+    }));
   }
 }
 
 //The following is to simulate data coming from serial stuff.
 setInterval(() => {
   simulateComputersReceivingData();
-}, 60000);
+}, 10000);

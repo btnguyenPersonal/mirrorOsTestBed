@@ -55,8 +55,8 @@ function Terminal({ setPage, computerId, userId, isAdmin }) {
       var message = JSON.parse(messageFromBackend.data.toString());
       if(message.messageType === "admin-kicked-user") {
         releaseSession(false);
-      } else {
-        printToTerminal(message);
+      } else if (message.messageType === "terminal-message") {
+        printToTerminal(message.text);
       }
     };
 

@@ -260,25 +260,8 @@ exports.useComputer = async (req, res) => {
   const userId = req.body.userId;
   const computerId = req.body.computerId;
   //Get the computer the user is attempting to use.
-  let computer = await Computer.findByPk(computerId)
-    .then((computer) => {
-      if (computer) {
-        return computer;
-      } else {
-        res.status(500).send({
-          message: `Cannot find Computer with id=${computerId}.`,
-        });
-        return;
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: "Error retrieving Computer with id=" + computerId,
-      });
-      return;
-    });
-
-
+  let computer = await Computer.findByPk(computerId);
+  let user = await User.findByPk(userId);
   //Check if the computer is available.
   if (computer.inUse) {
     res.status(500).send({
@@ -299,7 +282,7 @@ exports.useComputer = async (req, res) => {
     return session;
   });
   //If we could find an open session then let them know they cannot have the computer they are requesting.
-  if (session) {
+  if (session && !user.isAdmin) {
     res.status(500).send({
       message: `You already have an open session with computerId: ${session.computerId}. You may only have 1 computer at a time.`,
     });
