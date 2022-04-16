@@ -71,6 +71,8 @@ wsServerForQueue.on("connection", (ws) => {
     } else if (message.messageType === "admin-clear-queue") {
       if(!utils.isMessageValid(message, {adminUserId: "", computerId: ""})) return; 
       await handleClearQueue(message);
+    } else if (message.messageType === "update-my-queue") {
+      await sendQueueDataToWebsocket(ws)
     }
   });
 
@@ -143,10 +145,39 @@ async function updateAllQueueUsers() {
 }
 
 async function sendQueueDataToWebsocket(ws) {
-  await ws.send(JSON.stringify({
+  var modQueue = {};
+  for (const [computerId] of Object.entries(queue)) {
+    modQueue[computerId] = {};
+    modQueue[computerId].queue = queue[computerId];
+    for(const userId of queue[computerId]) {
+      let user = await User.findByPk(userId);
+      modQueue[computerId][userId] = {email: user.dataValues.email};
+    }
+  }
+  var computersInUse = {};
+  for(const [computerId] of Object.entries(computerIdToWebsocketDict)) {
+    let session = await Session.findOne({
+      where: {
+        computerId: computerId,
+        endTime: null,
+      },
+      order: [
+        ["startTime", "DESC"]
+      ],
+    }).then((session) => {
+      return session;
+    });
+    if(session) {
+      let user = await User.findByPk(session.userId);
+      computersInUse[computerId] = {session: session, user: user};
+    }
+  }
+  data = {
     messageType: "queue-data",
-    queue: queue,
-  }));
+    queue: modQueue,
+    computersInUse: computersInUse
+  };
+  await ws.send(JSON.stringify(data));
 }
 
 //Grant a user a computer they were waiting for. We do this by sending them a message which instructs the frontend to move to the TerminalPage.
