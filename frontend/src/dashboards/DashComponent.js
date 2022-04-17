@@ -1,10 +1,34 @@
 import React, { useState, useEffect } from "react";
 
-function DashComponent({ setPage, setComputerId, userId, admin }) {
+var qws;
+
+function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
   const [list, setList] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
-  const loadData = async () => {
+  var [queue, setQueue] = useState(null);
+
+  React.useEffect(() => {
+    initWebSocket();
+    window.onbeforeunload = () => qws.close();
+    return () => {
+      window.removeEventListener("beforeunload", () => {});
+    };
+  }, []);
+
+  // useEffect(() => {
+  //   //loadData();
+  //   const interval = setInterval(() => {
+  //     //loadData();
+  //   }, 1000);
+  //   return () => clearInterval(interval);
+  // }, []);
+
+  useEffect(() => {
+    if (list != null) setLoaded(true);
+  }, [list]);
+
+  async function loadData() {
     setLoaded(false);
     const res = await fetch(
       `http://${process.env.REACT_APP_IP}:8080/api/computer`
@@ -12,23 +36,17 @@ function DashComponent({ setPage, setComputerId, userId, admin }) {
     setList(await res.json());
   };
 
-  var [qws] = useState(new WebSocket(`ws://${process.env.REACT_APP_IP}:9001`));
-  var [queue, setQueue] = useState(null);
+  async function initWebSocket() {
+    qws = new WebSocket(`ws://${process.env.REACT_APP_IP}:9001`);
 
-  React.useEffect(() => {
-    initWebSocket();
-  });
-
-  function initWebSocket() {
-    qws.onopen = () => {
-      //Let the backend know what user wants what computer.
+    qws.onopen = async () => {
       qws.send(
         JSON.stringify({
           messageType: "websocket-queue-initialization-message",
           userId: userId,
         })
       );
-    };
+    }
 
     qws.onmessage = async (messageFromBackend) => {
       //Refresh the page, why not.
@@ -49,18 +67,6 @@ function DashComponent({ setPage, setComputerId, userId, admin }) {
       console.log("Queue websocket closed.");
     };
   }
-
-  useEffect(() => {
-    loadData();
-    const interval = setInterval(() => {
-      loadData();
-    }, 100000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (list != null) setLoaded(true);
-  }, [list]);
 
   async function joinQueue(computerId) {
     qws.send(
@@ -104,6 +110,7 @@ function DashComponent({ setPage, setComputerId, userId, admin }) {
       let json = await response.json();
       if (response.status === 200) {
         setComputerId(computerId);
+        await qws.close();
         setPage("TerminalPage");
       } else {
         document.getElementById("message_box").innerHTML =
@@ -147,7 +154,7 @@ function DashComponent({ setPage, setComputerId, userId, admin }) {
         >
           Refresh Page
         </button>
-        {admin ? <div>Welcome admin</div> : <div>Welcome</div>}
+        {isAdmin ? <div>Welcome admin</div> : <div>Welcome</div>}
         <div>OS Pi Testbed</div>
       </div>
       <div id="message_box"></div>

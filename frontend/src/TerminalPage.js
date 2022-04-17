@@ -6,19 +6,6 @@ function TerminalPage({ setPage, computerId, userId }) {
   const [isFilePicked, setIsFilePicked] = useState(false);
   const [fileUploaded, setFileUploaded] = useState(false);
 
-  var [ws] = useState(new WebSocket(`ws://${process.env.REACT_APP_IP}:9000`));
-
-  React.useEffect(() => {
-    initWebSocket();
-    window.onbeforeunload = () => releaseSession(true);
-    return () => {
-      window.removeEventListener("beforeunload", () => {});
-    };
-  });
-
-  const XTermRef = React.useRef();
-  const XTermOpt = { cursorBlink: true };
-
   const changeHandler = (event) => {
     setSelectedFile(event.target.files[0]);
     setIsFilePicked(true);
@@ -69,53 +56,6 @@ function TerminalPage({ setPage, computerId, userId }) {
     );
   };
 
-  async function releaseSession(isExitingPage) {
-    let requestBody = { userId: userId, computerId: computerId };
-    await fetch(`http://${process.env.REACT_APP_IP}:8080/api/releaseComputer`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    }).then(async (response) => {
-      ws.close();
-      if (isExitingPage) return;
-      let json = await response.json();
-      if (response.status === 200) {
-        setTimeout(function () {
-          setPage("Dashboard");
-        }, 1000);
-      } else {
-        document.getElementById("fail_message").innerHTML = "<p><small>" + json.message + "</small></p>";
-      }
-    });
-  }
-
-  async function initWebSocket() {
-    ws.onopen = () => {
-      ws.send(JSON.stringify({ messageType: "websocket-initialization-message", computerId: computerId }));
-      printToTerminal("You are now in control of computerId=" + computerId);
-    };
-
-    ws.onmessage = (messageFromBackend) => {
-      printToTerminal(messageFromBackend.data);
-    };
-
-    ws.onclose = () => {
-      printToTerminal("Session closed. You will be redirected shortly.");
-    };
-  }
-
-  function clearTerminal() {
-    XTermRef.current.terminal.clear();
-  }
-
-  function printToTerminal(str) {
-    if (XTermRef.current) {
-      XTermRef.current.terminal.write(str + "\r\n$ ");
-    }
-  }
-
   let content = (
     <div>
       {fileUploaded ? (
@@ -130,16 +70,13 @@ function TerminalPage({ setPage, computerId, userId }) {
           >
             Reset Pi
           </button>
-          <button onClick={() => releaseSession(false)}>Release session</button>
           <div id="fail_message"></div>
         </div>
       ) : (
         <Upload />
       )}
 
-      <Terminal XTermOpt={XTermOpt} XTermRef={XTermRef} ws={ws} />
-      <button onClick={() => releaseSession(false)}>Release session</button>
-      <button onClick={() => clearTerminal()}>Clear terminal</button>
+      <Terminal setPage={setPage} computerId={computerId} userId={userId}/>
     </div>
   );
   return content;

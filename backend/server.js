@@ -40,6 +40,7 @@ require("./app/routes/api.routes")(app);
 require("./app/routes/password.routes")(app);
 require("./app/routes/computer.routes")(app);
 require("./app/routes/session.routes")(app);
+require("./app/routes/switch.routes")(app);
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
@@ -54,6 +55,7 @@ async function initializeDb() {
   const Password = db.password;
   const Computer = db.computer;
   const User = db.user;
+  const Switch = db.switch;
   //The following is to wipe the database everytime.
   db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', {
       raw: true
@@ -101,7 +103,8 @@ async function initializeDb() {
       await EventType.create({
         eventType: "computer deleted"
       });
-
+      //Switch stuff?
+      await Switch.create({ ipAddress: "192.168.1.140", username: "ostestbed", password: "05testbed!" });
       //Password stuff.
       hashedPassword = await bcrypt.hash("p", 10);
       await Password.create({
