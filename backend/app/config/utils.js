@@ -1,3 +1,6 @@
+const db = require("../");
+const Event = db.event;
+
 module.exports = {
   LOGIN_EVENT_ID: 1,
   ADMIN_LOGIN_EVENT_ID: 2,
@@ -29,5 +32,12 @@ module.exports = {
       }
     }
     return true;
-  }
+  },
+  async createEvent(eventTypeId, userId, data) {
+    await Event.create({
+      eventTypeId: eventTypeId,
+      userId: userId,
+      data: JSON.stringify(data),
+    });
+  },
 };
