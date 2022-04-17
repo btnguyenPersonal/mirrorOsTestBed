@@ -4,10 +4,12 @@ const Password = db.password;
 const Session = db.session;
 const Computer = db.computer;
 const User = db.user;
+const Switch = db.switch;
 const bcrypt = require("bcrypt");
 const utils = require("../config/utils.js");
 require("dotenv").config();
 const exec = require("await-exec");
+const { password } = require("..");
 
 exports.reboot = async (req, res) => {
   /*
@@ -33,10 +35,18 @@ exports.reboot = async (req, res) => {
     });
     return;
   }
-  //Get the port ID to reset on the switch from the computer object.
+
+  //Get the switch details and port ID to reset on the switch from the computer object.
   const portId = theComputer.portId;
+  const switchId = theComputer.switchId;
+  
+  const switchDetails = await Switch.findByPk(switchId);
+  const ipAddress = switchDetails.ipAddress;
+  const username = switchDetails.username;
+  const password = switchDetails.password;
+
   //Execute the reboot script passing in the port ID to reboot.
-  let command = ` ./reboot.sh ${portId}`;
+  let command = ` ./reboot.sh ${ipAddress} ${username} ${password} ${portId}`;
   if (process.env.OS.includes("Windows")) {
     command = "cd"; //Windows can't run our command without Windows Subsystem for Linux (WSL) and I can't install it lol.
   }
