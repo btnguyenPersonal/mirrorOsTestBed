@@ -1,4 +1,5 @@
 const webSocket = require("ws");
+const api = require("../controllers/api.controller.js");
 
 // create websocket server
 const wsServer = new webSocket.Server({ port: 9000 });
@@ -11,7 +12,7 @@ var computerIdToWebsocketDict = {};
 //   baudRate: 115200,
 // });
 
-wsServer.on("connection", (ws) => {
+wsServer.on("connection", async (ws) => {
   // var parser = new ReadlineParser();
   // serialPort.pipe(parser);
   // parser.on("data", function (data) {
@@ -23,17 +24,20 @@ wsServer.on("connection", (ws) => {
     message = JSON.parse(message.toString());
     if (message.messageType === "websocket-initialization-message") {
       var computerId = message.computerId;
+      var userId = message.userId;
       if (computerIdToWebsocketDict[computerId]) return;
       computerIdToWebsocketDict[computerId] = ws;
       ws.computerId = computerId;
+      ws.userId = userId;
     } else if (message.messageType === "terminal-message") {
       console.log("Message received from frontend terminal: " + JSON.stringify(message.body));
     }
   });
 
-  ws.on("close", () => {
-    var computerId = ws.computerId;
-    delete computerIdToWebsocketDict[computerId];
+  ws.on("close", async () => {
+    if (!ws.computerId || !ws.userId) return;
+    await api.releaseComputer({ body: { computerId: ws.computerId, userId: ws.userId } }, null);
+    delete computerIdToWebsocketDict[ws.computerId];
   });
 });
 

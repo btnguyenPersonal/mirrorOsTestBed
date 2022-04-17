@@ -17,9 +17,13 @@ module.exports = {
   isBodyValid(req, res, requirements) {
     for (const [key, value] of Object.entries(requirements)) {
       if (req.body[key] == undefined) {
-        res.status(412).send({
-          message: `Missing attribute: "${key}": <${value}>`,
-        });
+        if (res) {
+          res.status(412).send({
+            message: `Missing attribute: "${key}": <${value}>`,
+          });
+        } else {
+          console.log(`Missing attribute: "${key}": <${value}>`);
+        }
         return false;
       }
     }
