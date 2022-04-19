@@ -16,13 +16,13 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
     };
   }, []);
 
-  // useEffect(() => {
-  //   //loadData();
-  //   const interval = setInterval(() => {
-  //     //loadData();
-  //   }, 1000);
-  //   return () => clearInterval(interval);
-  // }, []);
+  useEffect(() => {
+    loadData();
+    const interval = setInterval(() => {
+      loadData();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (list != null) setLoaded(true);
@@ -162,7 +162,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
         <ul>
           {list.map((item) => (
             <li key={item.computerId}>
-              {admin && (
+              {isAdmin && (
                 <button
                   style={{ backgroundColor: `#E68E8E` }}
                   onClick={() => deleteComputer(item.computerId)}
@@ -170,7 +170,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
                   Delete Computer
                 </button>
               )}
-              {admin && <br />}
+              {isAdmin && <br />}
               Computer ID: {item.computerId} | Computer Type: {item.model}
               {queue
                 ? ` | Users in Queue: ${JSON.stringify(

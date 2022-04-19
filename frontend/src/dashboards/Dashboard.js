@@ -4,7 +4,7 @@ import DashComponent from "./DashComponent";
 
 function Dashboard({ setPage, setComputerId, userId }) {
   let content = (
-    <DashComponent setPage={setPage} setComputerId={setComputerId} userId={userId} admin={false}/>
+    <DashComponent setPage={setPage} setComputerId={setComputerId} userId={userId} isAdmin={false}/>
   );
 
   return content;

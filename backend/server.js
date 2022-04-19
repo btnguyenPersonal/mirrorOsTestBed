@@ -120,32 +120,38 @@ async function initializeDb() {
       await Computer.create({
         portId: 2,
         serialNumber: 'e2f2ecf5',
-        model: "Raspberry Pi 3 Model B+"
+        model: "Raspberry Pi 3 Model B+",
+        switchId: 1
       });
       await Computer.create({
         portId: 3,
         serialNumber: 'e2f2ecf5',
-        model: "Raspberry Pi 3 Model B+"
+        model: "Raspberry Pi 3 Model B+",
+        switchId: 1
       });
       await Computer.create({
         portId: 4,
         serialNumber: 'e2f2ecf5',
-        model: "Raspberry Pi 3 Model B+"
+        model: "Raspberry Pi 3 Model B+",
+        switchId: 1
       });
       // await Computer.create({
       //   portId: 5,
       //   serialNumber: 'e2f2ecf5',
-      //   model: "Raspberry Pi 3 Model B+"
+      //   model: "Raspberry Pi 3 Model B+",
+      //   switchId: 1
       // });
       // await Computer.create({
       //   portId: 6,
       //   serialNumber: 'e2f2ecf5',
-      //   model: "Raspberry Pi 3 Model B+"
+      //   model: "Raspberry Pi 3 Model B+",
+      //   switchId: 1
       // });
       // await Computer.create({
       //   portId: 7,
       //   serialNumber: 'e2f2ecf5',
-      //   model: "Raspberry Pi 3 Model B+"
+      //   model: "Raspberry Pi 3 Model B+",
+      //   switchId: 1
       // });
     }))
 };

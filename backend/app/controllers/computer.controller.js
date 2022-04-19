@@ -10,6 +10,7 @@ exports.create = (req, res) => {
       model: "string",
       serialNumber: "string",
       userId: "integer",
+      switchId: "integer",
     })
   ) {
     return;
@@ -19,6 +20,7 @@ exports.create = (req, res) => {
     portId: req.body.portId,
     model: req.body.model,
     serialNumber: req.body.serialNumber,
+    switchId: req.body.switchId,
   };
   Computer.create(computer)
     .then((data) => {
