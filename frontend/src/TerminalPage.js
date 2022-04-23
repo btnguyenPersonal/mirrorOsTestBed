@@ -1,7 +1,7 @@
 import Terminal from "./terminalComponents/Terminal";
 import React, { useState } from "react";
 
-function TerminalPage({ setPage, computerId, userId }) {
+function TerminalPage({ setPage, computerId, userId, isAdmin }) {
   const [selectedFile, setSelectedFile] = useState();
   const [isFilePicked, setIsFilePicked] = useState(false);
   const [fileUploaded, setFileUploaded] = useState(false);
@@ -76,7 +76,7 @@ function TerminalPage({ setPage, computerId, userId }) {
         <Upload />
       )}
 
-      <Terminal setPage={setPage} computerId={computerId} userId={userId}/>
+      <Terminal setPage={setPage} computerId={computerId} userId={userId} isAdmin={isAdmin}/>
     </div>
   );
   return content;

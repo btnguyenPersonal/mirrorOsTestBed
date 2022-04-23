@@ -39,7 +39,7 @@ exports.reboot = async (req, res) => {
   //Get the switch details and port ID to reset on the switch from the computer object.
   const portId = theComputer.portId;
   const switchId = theComputer.switchId;
-  
+
   const switchDetails = await Switch.findByPk(switchId);
   const ipAddress = switchDetails.ipAddress;
   const username = switchDetails.username;
@@ -92,12 +92,13 @@ exports.fileUpload = async (req, res) => {
     return;
   }
 
-  if (typeof req.file === "undefined") return res.status(400).send({
-    message: "No file sent"
-  });
+  if (typeof req.file === "undefined")
+    return res.status(400).send({
+      message: "No file sent",
+    });
 
   res.status(200).send({
-    message: "Successful file upload"
+    message: "Successful file upload",
   });
 };
 
@@ -149,17 +150,13 @@ exports.login = async (req, res) => {
       where: {
         isAdminPassword: 0,
       },
-      order: [
-        ["createdAt", "DESC"]
-      ],
+      order: [["createdAt", "DESC"]],
     }),
     Password.findOne({
       where: {
         isAdminPassword: 1,
       },
-      order: [
-        ["createdAt", "DESC"]
-      ],
+      order: [["createdAt", "DESC"]],
     }),
   ]).then((modelReturn) => {
     return modelReturn.flat();
@@ -260,25 +257,8 @@ exports.useComputer = async (req, res) => {
   const userId = req.body.userId;
   const computerId = req.body.computerId;
   //Get the computer the user is attempting to use.
-  let computer = await Computer.findByPk(computerId)
-    .then((computer) => {
-      if (computer) {
-        return computer;
-      } else {
-        res.status(500).send({
-          message: `Cannot find Computer with id=${computerId}.`,
-        });
-        return;
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: "Error retrieving Computer with id=" + computerId,
-      });
-      return;
-    });
-
-
+  let computer = await Computer.findByPk(computerId);
+  let user = await User.findByPk(userId);
   //Check if the computer is available.
   if (computer.inUse) {
     res.status(500).send({
@@ -292,14 +272,12 @@ exports.useComputer = async (req, res) => {
       userId: userId,
       endTime: null,
     },
-    order: [
-      ["startTime", "DESC"]
-    ],
+    order: [["startTime", "DESC"]],
   }).then((session) => {
     return session;
   });
   //If we could find an open session then let them know they cannot have the computer they are requesting.
-  if (session) {
+  if (session && !user.isAdmin) {
     res.status(500).send({
       message: `You already have an open session with computerId: ${session.computerId}. You may only have 1 computer at a time.`,
     });
@@ -321,7 +299,7 @@ exports.useComputer = async (req, res) => {
   });
   res.status(200).send({
     message: `Success! You are now in control of id=${computerId}`,
-    newSession
+    newSession,
   });
 };
 
@@ -362,34 +340,40 @@ exports.releaseComputer = async (req, res) => {
       if (computer) {
         return computer;
       } else {
-        res.status(500).send({
-          message: `Cannot find Computer with id=${computerId}.`,
-        });
+        if (res) {
+          res.status(500).send({
+            message: `Cannot find Computer with id=${computerId}.`,
+          });
+        }
         return;
       }
     })
     .catch((err) => {
-      res.status(500).send({
-        message: "Error retrieving Computer with id=" + computerId,
-      });
+      if (res) {
+        res.status(500).send({
+          message: "Error retrieving Computer with id=" + computerId,
+        });
+      }
       return;
     });
+
   //If the computer is not in use, let the user know and exit.
   if (!computer.inUse) {
-    res.status(200).send({
-      message: "Computer with id=" + computerId + " is not in use.",
-    });
+    if (res) {
+      res.status(200).send({
+        message: "Computer with id=" + computerId + " is not in use.",
+      });
+    }
     return;
   }
   //Attempt to find an open session associated with the user requesting to release a computer.
   let session = await Session.findOne({
     where: {
+      computerId: computerId,
       userId: userId,
       endTime: null,
     },
-    order: [
-      ["startTime", "DESC"]
-    ],
+    order: [["startTime", "DESC"]],
   }).then((session) => {
     return session;
   });
@@ -397,16 +381,19 @@ exports.releaseComputer = async (req, res) => {
   if (session) {
     session.endTime = Date.now();
     await session.save();
+    //Create a session end event.
+    await Event.create({
+      eventTypeId: utils.SESSION_END_EVENT_ID,
+      userId: userId,
+    });
   }
-  //Create a session end event.
-  await Event.create({
-    eventTypeId: utils.SESSION_END_EVENT_ID,
-    userId: userId,
-  });
   //Update the computer to not longer be in use.
   computer.inUse = false;
   await computer.save();
-  res.status(200).send({
-    message: `Success! Computer id=${computerId} has been released.`,
-  });
+
+  if (res) {
+    res.status(200).send({
+      message: `Success! Computer id=${computerId} has been released.`,
+    });
+  }
 };

@@ -3,7 +3,7 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import "./Login.css";
 
-function Login({ setPage, setUserId }) {
+function Login({ setPage, setUserId, setIsAdmin}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -28,8 +28,10 @@ function Login({ setPage, setUserId }) {
         let json = await response.json();
         setUserId(json.user.userId);
         if (json.usedAdminPassword) {
+          setIsAdmin(true);
           setPage("AdminDashboard");
         } else {
+          setIsAdmin(false);
           setPage("Dashboard");
         }
       } else {

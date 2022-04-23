@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 
 var qws;
+var wsIdDebug = "empty";
 
 function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
   const [list, setList] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
   var [queue, setQueue] = useState(null);
+  var [computersInUse, setComputersInUse] = useState(null);
 
   React.useEffect(() => {
     initWebSocket();
@@ -34,6 +36,11 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
       `http://${process.env.REACT_APP_IP}:8080/api/computer`
     );
     setList(await res.json());
+    qws.send(
+      JSON.stringify({
+        messageType: "update-my-queue"
+      })
+    );
   };
 
   async function initWebSocket() {
@@ -49,17 +56,22 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
     }
 
     qws.onmessage = async (messageFromBackend) => {
-      //Refresh the page, why not.
-      loadData();
       //Convert the message to an object we can easily work with.
       var message = JSON.parse(messageFromBackend.data.toString());
-      if (message.messageType === "granted-computer") {
+      if (message.messageType === "initialize-websocket") {
+        qws.id = message.wsId;
+        wsIdDebug = message.wsId;       
+        loadData(); //Refresh the page, why not.
+      } else if (message.messageType === "granted-computer") {
         obtainComputer(message.computerId);
+        loadData(); //Refresh the page, why not.
       } else if (message.messageType === "message-to-display") {
         document.getElementById("message_box").innerHTML =
           "<p><small>" + message.body + "</small></p>";
+        loadData(); //Refresh the page, why not.
       } else if (message.messageType === "queue-data") {
         setQueue(message.queue);
+        setComputersInUse(message.computersInUse);
       }
     };
 
@@ -81,12 +93,12 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
   }
 
   function isInQueue(computerId) {
-    return queue[computerId].includes(userId);
+    return queue[computerId].queue.includes(userId);
   }
 
   function getPositionStr(computerId) {
     if (isInQueue(computerId)) {
-      var thePosition = queue[computerId].indexOf(userId);
+      var thePosition = queue[computerId].queue.indexOf(userId);
       return (
         " | Position in queue: " +
         thePosition +
@@ -96,6 +108,33 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
     } else {
       return "Not in queue for computerId=" + computerId;
     }
+  }
+
+  function kickUserOffComputer(computerId) {
+    qws.send(JSON.stringify({
+      messageType: "admin-kick-user-off-computer",
+      adminUserId: userId,
+      computerId: computerId
+    }));
+    setTimeout(function () {
+      loadData();
+    }, 300);
+  }
+
+  function joinFrontOfQueue(computerId) {
+    qws.send(JSON.stringify({
+      messageType: "admin-join-front-of-queue",
+      adminUserId: userId,
+      computerId: computerId
+    }));
+  }
+
+  function clearQueue(computerId) {
+    qws.send(JSON.stringify({
+      messageType: "admin-clear-queue",
+      adminUserId: userId,
+      computerId: computerId
+    }));
   }
 
   function obtainComputer(computerId) {
@@ -139,6 +178,23 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
       });
     }
   }
+  
+  function getSessionInfo(computerId) {
+    if(!computersInUse) return "";
+    if(!computersInUse[computerId]) return "";
+    return "Session Duration: " + getSessionDuration(computerId) + " | Active User: " + computersInUse[computerId].user.email
+  }
+
+  function getSessionDuration(computerId) {
+    var now = new Date();
+    var sessionStart = new Date(computersInUse[computerId].session.startTime);
+    var durationMs = now - sessionStart;
+    var hours = Math.floor(durationMs/(1000*60*60));
+    var minutes = (durationMs/(1000*60)).toFixed(0);
+    //actually needs to not use !=
+    return (hours != 0 ? hours + "h " : "") +
+      (minutes != 0 ? minutes + "m " : "<1m")
+  }
 
   let content = (
     <nav>
@@ -174,21 +230,27 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
               Computer ID: {item.computerId} | Computer Type: {item.model}
               {queue
                 ? ` | Users in Queue: ${JSON.stringify(
-                    queue[item.computerId].length
+                    queue[item.computerId].queue.length
                   )}`
                 : ""}
               {queue && isInQueue(item.computerId)
                 ? getPositionStr(item.computerId)
                 : ""}
               {!item.inUse ? (
-                <p style={{ color: `#33CC33` }}>
+                <div style={{ color: `#33CC33` }}>
                   <b>AVAILABLE</b>
-                </p>
+                </div>
               ) : (
-                <p style={{ color: `#FF0000` }}>
+                <div style={{ color: `#FF0000` }}>
                   <b>IN USE</b>
-                </p>
+                </div>
               )}
+              {isAdmin ? (
+                <div>
+                  {getSessionInfo(item.computerId)}
+                </div>
+              ) : ""}
+              <br/>
               {queue ? (
                 !isInQueue(item.computerId) ? (
                   <button
@@ -208,6 +270,27 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
               ) : (
                 ""
               )}
+              {isAdmin ? (
+                <div>
+                  <br/>
+                <button
+                  style={{ backgroundColor: `#7EC8E3` }}
+                  onClick={() => kickUserOffComputer(item.computerId)}>
+                  KICK USER OFF COMPUTER
+                </button> <div></div>
+                <button
+                  style={{ backgroundColor: `#7EC8E3` }}
+                  onClick={() => joinFrontOfQueue(item.computerId)}>
+                  JOIN FRONT OF QUEUE
+                </button>
+                <button
+                  style={{ backgroundColor: `#7EC8E3` }}
+                  onClick={() => clearQueue(item.computerId)}>
+                  CLEAR QUEUE
+                </button>
+              </div>
+                ) : ""
+              } 
             </li>
           ))}
         </ul>
@@ -216,7 +299,21 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
       )}
       <button onClick={() => joinQueue("all")}>JOIN ALL QUEUES </button>
       <button onClick={() => exitQueue("all")}>EXIT ALL QUEUES </button>
+      {isAdmin ? (
+        <div>       
+          <div>
+          </div>
+          <button onClick={() => setPage("ChangePasswordForm")}>
+            Go to Change Password
+          </button>
+        </div>
+
+      ) : ""}
+      <br/>
+      <div id="debugthing"> <b>STUFF FOR DEBUGGING:</b></div>
       <div id="queue-state"> QUEUE STATE: {JSON.stringify(queue)}</div>
+      <div id="user"> USER ID: {userId}</div>
+      <div id="wsId"> WS ID: {wsIdDebug}</div>
     </nav>
   );
 
