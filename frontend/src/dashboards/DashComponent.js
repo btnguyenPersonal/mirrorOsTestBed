@@ -164,7 +164,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
     );
     if (confirmed) {
       let requestBody = { userId: userId, computerId: computerId };
-      fetch(`http://${process.env.REACT_APP_IP}:8080/api/computerDestroy`, {
+      fetch(`http://${process.env.REACT_APP_IP}:8080/api/computer`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -178,7 +178,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
       });
     }
   }
-  
+
   function getSessionInfo(computerId) {
     if(!computersInUse) return "";
     if(!computersInUse[computerId]) return "";
@@ -221,7 +221,12 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
               {isAdmin && (
                 <button
                   style={{ backgroundColor: `#E68E8E` }}
-                  onClick={() => deleteComputer(item.computerId)}
+                  onClick={() => {
+                    if(!item.inUse) {
+                      deleteComputer(item.computerId)
+                    } else {
+                      document.getElementById("message_box").innerHTML = "You cannot delete a computer that is in use.";
+                    }}}
                 >
                   Delete Computer
                 </button>
@@ -303,11 +308,14 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
         <div>       
           <div>
           </div>
+          <b/>
           <button onClick={() => setPage("ChangePasswordForm")}>
             Go to Change Password
           </button>
+          <button onClick={() => setPage("AddComputerForm")}>
+            Go to Add Computer
+          </button>
         </div>
-
       ) : ""}
       <br/>
       <div id="debugthing"> <b>STUFF FOR DEBUGGING:</b></div>

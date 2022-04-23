@@ -24,7 +24,7 @@ exports.create = (req, res) => {
   };
   Computer.create(computer)
     .then((data) => {
-      res.send(data);
+      res.send({data, message: "Created computer."});
     })
     .catch((err) => {
       res.status(500).send({
@@ -81,6 +81,10 @@ exports.destroy = (req,res) => {
       res.status(200).send({
         message: `Computer deleted`,
       });
+      Event.create({
+        eventTypeId: utils.COMPUTER_DELETED_EVENT_ID,
+        userId: userId,
+      });
     } else {
       res.status(500).send({
         message: `Cannot find Computer with id=${computerId}.`,
@@ -88,12 +92,9 @@ exports.destroy = (req,res) => {
     }
   })
   .catch((err) => {
+    console.log(err);
     res.status(500).send({
       message: "Error deleting Computer with id=" + computerId,
     });
-  });
-  Event.create({
-    eventTypeId: utils.COMPUTER_DELETED_EVENT_ID,
-    userId: userId,
   });
 }

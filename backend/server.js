@@ -15,10 +15,6 @@ const db = require("./app");
 
 initializeDb();
 
-// initialize queue and computer websockets
-require("./app/websockets/queueWebsocketServer.js");
-require("./app/websockets/computerWebsocketServer.js");
-
 app.use(cors(corsOptions));
 // parse requests of content-type - application/json
 app.use(express.json());
@@ -160,6 +156,9 @@ async function initializeDb() {
           //   serialNumber: 'e2f2ecf5',
           //   model: "Raspberry Pi 3 Model B+"
           // });
+          // initialize queue and computer websockets
+          require("./app/websockets/queueWebsocketServer.js");
+          require("./app/websockets/computerWebsocketServer.js");
         })
     );
 }

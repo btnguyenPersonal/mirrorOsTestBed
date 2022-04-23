@@ -569,6 +569,9 @@
                 },
                 "serialNumber": {
                   "example": "any"
+                },
+                "switchId": {
+                  "example": "any"
                 }
               }
             }
@@ -597,33 +600,7 @@
             "description": "Internal Server Error"
           }
         }
-      }
-    },
-    "/api/computer/{id}": {
-      "get": {
-        "tags": [
-          "computer"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/computerDestroy/": {
+      },
       "delete": {
         "tags": [
           "computer"
@@ -644,6 +621,30 @@
                 }
               }
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/computer/{id}": {
+      "get": {
+        "tags": [
+          "computer"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {

@@ -20,13 +20,22 @@ const userIdToWsIdListDict = {};
 //A dictionary mapping computerIds to it's associated queue of users waiting for it to become available.
 var queue = {};
 var globalWsId = 1;
-initQueue();
+syncQueue();
 
-async function initQueue() {
+async function syncQueue() {
   var computers = await Computer.findAll();
+  var computersDict = {};
   for (var computer of computers) {
+    computersDict[computer.computerId] = true;
+    //If a computer is not in the queue, add it to it.
     if (!queue[computer.computerId]) {
       queue[computer.computerId] = [];
+    }
+  }
+  for(const [computerId] of Object.keys(queue)) {
+    //If the queue has a computer that doesn't exist anymore, delete it.
+    if(!computersDict[computerId]) {
+      delete queue[computerId];
     }
   }
 }
@@ -104,6 +113,7 @@ async function updateAllQueueUsers() {
 }
 
 async function sendQueueDataToWebsocket(ws) {
+  await syncQueue();
   var modQueue = {};
   for (const [computerId] of Object.entries(queue)) {
     modQueue[computerId] = {};
