@@ -4,5 +4,6 @@ module.exports = (app) => {
   router.post("/api/computer/", computer.create);
   router.get("/api/computer/", computer.findAll);
   router.get("/api/computer/:id", computer.findOne);
+  router.delete("/api/computer/", computer.destroy);
   app.use("", router);
 };

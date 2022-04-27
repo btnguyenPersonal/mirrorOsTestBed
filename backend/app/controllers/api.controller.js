@@ -258,7 +258,9 @@ exports.useComputer = async (req, res) => {
   const computerId = req.body.computerId;
   //Get the computer the user is attempting to use.
   let computer = await Computer.findByPk(computerId);
+  if(!computer) return;
   let user = await User.findByPk(userId);
+  if(!user) return;
   //Check if the computer is available.
   if (computer.inUse) {
     res.status(500).send({

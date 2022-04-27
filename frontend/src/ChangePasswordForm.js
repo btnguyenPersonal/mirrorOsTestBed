@@ -3,7 +3,7 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import "./ChangePasswordForm.css";
 
-function ChangePasswordForm({ userId }) {
+function ChangePasswordForm({ setPage, userId }) {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordConf, setNewPasswordConf] = useState("");
@@ -40,6 +40,9 @@ function ChangePasswordForm({ userId }) {
 
   let content = (
     <div className="ChangePassword">
+      <button onClick={() => setPage("AdminDashboard")}>
+        Go back to admin dashboard
+      </button>
       <h1>Change Password</h1>
       <Form onSubmit={handleSubmit}>
 

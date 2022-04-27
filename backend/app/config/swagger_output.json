@@ -558,10 +558,19 @@
             "schema": {
               "type": "object",
               "properties": {
+                "userId": {
+                  "example": "any"
+                },
                 "portId": {
                   "example": "any"
                 },
                 "model": {
+                  "example": "any"
+                },
+                "serialNumber": {
+                  "example": "any"
+                },
+                "switchId": {
                   "example": "any"
                 }
               }
@@ -583,6 +592,37 @@
         ],
         "description": "",
         "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "computer"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "computerId": {
+                  "example": "any"
+                },
+                "userId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"

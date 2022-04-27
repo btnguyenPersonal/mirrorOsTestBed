@@ -25,6 +25,6 @@ module.exports = (db) => {
       type: Sequelize.INTEGER,
     },
   });
-  Computer.belongsTo(Switch, {foreignKey: "switchId"});
+  //Computer.belongsTo(Switch, {foreignKey: "switchId"});
   return Computer;
 };
