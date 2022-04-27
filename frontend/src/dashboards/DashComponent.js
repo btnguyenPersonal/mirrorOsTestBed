@@ -1,4 +1,4 @@
-import React, {  useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 var qws;
 var wsIdDebug = "empty";
@@ -158,6 +158,27 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
     });
   }
 
+  function deleteComputer(computerId) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete the computer with id=" + computerId + "?"
+    );
+    if (confirmed) {
+      let requestBody = { userId: userId, computerId: computerId };
+      fetch(`http://${process.env.REACT_APP_IP}:8080/api/computer`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }).then(async (response) => {
+        let json = await response.json();
+        document.getElementById("message_box").innerHTML =
+          "<p><small>" + json.message + "</small></p>";
+        loadData();
+      });
+    }
+  }
+
   function getSessionInfo(computerId) {
     if(!computersInUse) return "";
     if(!computersInUse[computerId]) return "";
@@ -197,6 +218,20 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
         <ul>
           {list.map((item) => (
             <li key={item.computerId}>
+              {isAdmin && (
+                <button
+                  style={{ backgroundColor: `#E68E8E` }}
+                  onClick={() => {
+                    if(!item.inUse) {
+                      deleteComputer(item.computerId)
+                    } else {
+                      document.getElementById("message_box").innerHTML = "You cannot delete a computer that is in use.";
+                    }}}
+                >
+                  Delete Computer
+                </button>
+              )}
+              {isAdmin && <br />}
               Computer ID: {item.computerId} | Computer Type: {item.model}
               {queue
                 ? ` | Users in Queue: ${JSON.stringify(
@@ -273,11 +308,14 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
         <div>       
           <div>
           </div>
+          <b/>
           <button onClick={() => setPage("ChangePasswordForm")}>
             Go to Change Password
           </button>
+          <button onClick={() => setPage("AddComputerForm")}>
+            Go to Add Computer
+          </button>
         </div>
-
       ) : ""}
       <br/>
       <div id="debugthing"> <b>STUFF FOR DEBUGGING:</b></div>

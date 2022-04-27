@@ -29,7 +29,7 @@ module.exports = (db) => {
       updatedAt: false,
     }
   );
-  Session.belongsTo(Computer, {foreignKey: "computerId"})
-  Session.belongsTo(User, {foreignKey: "userId"})
+  // Session.belongsTo(Computer, {foreignKey: "computerId"})
+  // Session.belongsTo(User, {foreignKey: "userId"})
   return Session;
 };
