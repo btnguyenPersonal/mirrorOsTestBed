@@ -126,16 +126,19 @@ async function initializeDb() {
           //Computer stuff. inUse is false by default.
           await Computer.create({
             portId: 2,
+            switchId: 1,
             serialNumber: "e2f2ecf5",
             model: "Raspberry Pi 3 Model B+",
           });
           await Computer.create({
             portId: 3,
+            switchId: 1,
             serialNumber: "e2f2ecf5",
             model: "Raspberry Pi 3 Model B+",
           });
           await Computer.create({
             portId: 4,
+            switchId: 1,
             serialNumber: "e2f2ecf5",
             model: "Raspberry Pi 3 Model B+",
           });

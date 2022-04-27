@@ -6,19 +6,27 @@ const wsServer = new webSocket.Server({ port: 9000 });
 //A dictionary mapping each active computer to it's associated websocket to the user using the computer.
 var computerIdToWebsocketDict = {};
 
-// var { SerialPort, ReadlineParser } = require("serialport");
-// var serialPort = new SerialPort({
-//   path: "/dev/ttyUSB0",
-//   baudRate: 115200,
-// });
+var { SerialPort, ReadlineParser } = require("serialport");
+var serialPort = new SerialPort({
+  path: "/dev/ttyUSB0",
+  baudRate: 115200,
+});
 
 wsServer.on("connection", async (ws) => {
-  // var parser = new ReadlineParser();
-  // serialPort.pipe(parser);
-  // parser.on("data", function (data) {
-  //   console.log("data from serial: " + data);
-  //   ws.send(data);
-  // });
+  var parser = new ReadlineParser();
+  serialPort.pipe(parser);
+  parser.on("data", function (data) {
+    console.log("data from serial: " + data);
+    if (data.includes("ttyS0")) {
+      serialPort.write("\n");
+    }
+    ws.send(
+      JSON.stringify({
+        messageType: "terminal-message",
+        text: data,
+      })
+    );
+  });
 
   ws.on("message", (message) => {
     message = JSON.parse(message.toString());
@@ -31,6 +39,7 @@ wsServer.on("connection", async (ws) => {
       ws.userId = userId;
     } else if (message.messageType === "terminal-message") {
       console.log("Message received from frontend terminal: " + JSON.stringify(message.body));
+      serialPort.write(message.body + "\n\n");
     }
   });
 
@@ -55,7 +64,7 @@ function simulateComputersReceivingData() {
 
 //The following is to simulate data coming from serial stuff.
 setInterval(() => {
-  simulateComputersReceivingData();
+  //simulateComputersReceivingData();
 }, 10000);
 
 module.exports = [computerIdToWebsocketDict];

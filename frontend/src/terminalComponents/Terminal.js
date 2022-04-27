@@ -18,7 +18,7 @@ function Terminal({ setPage, computerId, userId, isAdmin }) {
 
     ws.onopen = () => {
       ws.send(JSON.stringify({ messageType: "websocket-initialization-message", computerId: computerId, userId: userId }));
-      printToTerminal("You are now in control of computerId=" + computerId);
+      //printToTerminal("You are now in control of computerId=" + computerId);
     };
 
     ws.onmessage = (messageFromBackend) => {
@@ -48,7 +48,7 @@ function Terminal({ setPage, computerId, userId, isAdmin }) {
 
   function printToTerminal(str) {
     if (XTermRef.current) {
-      XTermRef.current.terminal.write(str + "\r\n$ ");
+      XTermRef.current.terminal.write(str + "\r\n");
     }
   }
 
@@ -65,7 +65,7 @@ function Terminal({ setPage, computerId, userId, isAdmin }) {
     if (event.key === "\r") {
       ws.send(JSON.stringify({ messageType: "terminal-message", body: messageString }));
       messageString = "";
-      XTermRef.current.terminal.write("\r\n$ ");
+      XTermRef.current.terminal.write("\r\n");
     } else {
       if (code !== 127) {
         messageString += event.key;
