@@ -2,6 +2,7 @@ import React from "react";
 import { XTerm } from "xterm-for-react";
 
 var ws;
+let afterInput = false;
 
 function Terminal({ setPage, computerId, userId, isAdmin }) {
   let messageString = "";
@@ -48,9 +49,14 @@ function Terminal({ setPage, computerId, userId, isAdmin }) {
 
   function printToTerminal(str) {
     if (XTermRef.current) {
+      if (afterInput) {
+        afterInput = false;
+        return 0;
+      }
       XTermRef.current.terminal.write(str + "\r\n");
     }
   }
+
 
   const onKey = (event) => {
     const code = event.key.charCodeAt(0);
@@ -64,6 +70,7 @@ function Terminal({ setPage, computerId, userId, isAdmin }) {
 
     if (event.key === "\r") {
       ws.send(JSON.stringify({ messageType: "terminal-message", body: messageString }));
+      afterInput = true;
       messageString = "";
       XTermRef.current.terminal.write("\r\n");
     } else {
