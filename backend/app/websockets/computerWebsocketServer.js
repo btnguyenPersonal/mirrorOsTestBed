@@ -39,7 +39,7 @@ wsServer.on("connection", async (ws) => {
       ws.userId = userId;
     } else if (message.messageType === "terminal-message") {
       console.log("Message received from frontend terminal: " + JSON.stringify(message.body));
-      serialPort.write(message.body + "\n\n");
+      serialPort.write(message.body + "\n");
     }
   });
 
