@@ -114,6 +114,7 @@ async function initializeDb() {
           });
           //Switch stuff?
           await Switch.create({ ipAddress: "192.168.1.140", username: "ostestbed", password: "05testbed!" });
+          await Switch.create({ ipAddress: "193.168.1.140", username: "ostestbed", password: "05testbed!" });
           //Password stuff.
           hashedPassword = await bcrypt.hash("p", 10);
           await Password.create({
@@ -128,16 +129,20 @@ async function initializeDb() {
           //Computer stuff. inUse is false by default.
           await Computer.create({
             portId: 2,
+            switchId: 1,
             serialNumber: "e2f2ecf5",
             model: "Raspberry Pi 3 Model B+",
+
           });
           await Computer.create({
             portId: 3,
+            switchId: 1,
             serialNumber: "e2f2ecf5",
             model: "Raspberry Pi 3 Model B+",
           });
           await Computer.create({
             portId: 4,
+            switchId: 1,
             serialNumber: "e2f2ecf5",
             model: "Raspberry Pi 3 Model B+",
           });

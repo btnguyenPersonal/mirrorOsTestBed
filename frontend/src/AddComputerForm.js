@@ -1,23 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import "./AddComputerForm.css";
 
 function AddComputerForm({ setPage, userId }) {
-    const [model, setModel] = useState("");
-    const [portId, setPortId] = useState("");
-    const [serialNumber, setSerialNumber] = useState("");
-    const [switchId, setSwitchId] = useState("");
-  
+  const [list, setList] = useState([""]);
+  const [model, setModel] = useState("");
+  const [portId, setPortId] = useState("");
+  const [serialNumber, setSerialNumber] = useState("");
+  const [switchId, setSwitchId] = useState(1);
+  const options = ['Raspberry Pi 3b', 'Raspberry Pi 3b+', 'Raspberry Pi 4'];
 
   function validateForm() {
-    return (model !== "" && portId !== "" && serialNumber !== "" && switchId !== "");
+    return (
+      model !== "" && portId !== "" && serialNumber !== "" && switchId !== ""
+    );
   }
 
   function handleSubmit(event) {
     sendNewComputer();
     event.preventDefault();
   }
+
+  async function loadData() {
+    const res = await fetch(
+      `http://${process.env.REACT_APP_IP}:8080/api/switch`
+    );
+    setList(await res.json());
+  };
+
+  useEffect(() => {
+    loadData();
+    const interval = setInterval(() => {
+      loadData();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   function sendNewComputer() {
     const computer = { model, portId, serialNumber, switchId, userId };
@@ -27,7 +45,8 @@ function AddComputerForm({ setPage, userId }) {
       body: JSON.stringify(computer),
     }).then(async (response) => {
       let json = await response.json();
-      document.getElementById("message_").innerHTML = "<p><small>" + json.message + "</small>";
+      document.getElementById("message_").innerHTML =
+        "<p><small>" + json.message + "</small>";
     });
   }
 
@@ -40,12 +59,13 @@ function AddComputerForm({ setPage, userId }) {
       <Form onSubmit={handleSubmit}>
         <Form.Label className="input_field_label">Model: </Form.Label>
         <Form.Group size="lg" controlId="model">
-          <Form.Control
-            className="input_field1"
-            type="text"
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-          />
+          <select id="template-select" value={model} onChange={(e) => setModel(e.target.value)}>
+            {options.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
         </Form.Group>
         <Form.Label className="input_field_label">Port ID: </Form.Label>
         <Form.Group size="lg" controlId="portId">
@@ -67,12 +87,13 @@ function AddComputerForm({ setPage, userId }) {
         </Form.Group>
         <Form.Label className="input_field_label">Switch ID: </Form.Label>
         <Form.Group size="lg" controlId="switchId">
-          <Form.Control
-            className="input_field4"
-            type="text"
-            value={switchId}
-            onChange={(e) => setSwitchId(e.target.value)}
-          />
+        <select id="template-select" value={switchId} onChange={(e) => setSwitchId(e.target.value)}>
+            {list.map((list) => (
+              <option key={list.switchId} value={list.switchId}>
+                {list.switchId} {list.ipAddress}
+              </option>
+            ))}
+          </select>
         </Form.Group>
         <Button size="lg" type="submit" disabled={!validateForm()}>
           Add Computer

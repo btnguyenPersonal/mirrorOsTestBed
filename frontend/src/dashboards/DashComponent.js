@@ -22,7 +22,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
     loadData();
     const interval = setInterval(() => {
       loadData();
-    }, 10000);
+    }, 100000);
     return () => clearInterval(interval);
   }, []);
 

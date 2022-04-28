@@ -11,6 +11,7 @@ const endpointsFiles = [
   "./app/routes/user.routes.js",
   "./app/routes/computer.routes.js",
   "./app/routes/session.routes.js",
+  "./app/routes/switch.routes.js"
 ];
 
 const doc = {
