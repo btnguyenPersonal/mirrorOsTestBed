@@ -8,7 +8,7 @@ const swaggerFile = require("./app/config/swagger_output.json");
 
 const app = express();
 var corsOptions = {
-  origin: `http://${process.env.IP}:3000`,
+  origin: [`http://${process.env.IP}:3000`, `http://localhost:3000`],
 };
 
 const db = require("./app");
@@ -16,6 +16,7 @@ const db = require("./app");
 initializeDb();
 
 app.use(cors(corsOptions));
+//app.use(cors({origin: `localhost`}));
 // parse requests of content-type - application/json
 app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
