@@ -138,12 +138,12 @@ async function initializeDb() {
             serialNumber: "e2f2ecf5",
             model: "Raspberry Pi 3 Model B+",
           });
-          await Computer.create({
-            portId: 4,
-            switchId: 1,
-            serialNumber: "e2f2ecf5",
-            model: "Raspberry Pi 3 Model B+",
-          });
+          // await Computer.create({
+          //   portId: 4,
+          //   switchId: 1,
+          //   serialNumber: "e2f2ecf5",
+          //   model: "Raspberry Pi 3 Model B+",
+          // });
           // await Computer.create({
           //   portId: 5,
           //   serialNumber: 'e2f2ecf5',
