@@ -11,23 +11,45 @@ var serialPort = new SerialPort({
   path: "/dev/ttyUSB0",
   baudRate: 115200,
 });
+var serialPort2 = new SerialPort({
+  path: "/dev/ttyUSB1",
+  baudRate: 115200,
+});
+var parser = new ReadlineParser();
+var parser2 = new ReadlineParser();
+serialPort.pipe(parser);
+serialPort2.pipe(parser2);
+parser.on("data", function (data) {
+  console.log("data from serial1: " + data);
+  let ws1 = computerIdToWebsocketDict[1];
+  console.log("ws1: " + ws1);
+  if (!ws1) {
+    console.log("no websocket computer 1");
+    return;
+  }
+  ws1.send(
+    JSON.stringify({
+      messageType: "terminal-message",
+      text: data,
+    })
+  );
+});
+parser2.on("data", function (data) {
+  console.log("data from serial2: " + data);
+  let ws2 = computerIdToWebsocketDict[2];
+  if (!ws2) {
+    console.log("no websocket computer 2");
+    return;
+  }
+  ws2.send(
+    JSON.stringify({
+      messageType: "terminal-message",
+      text: data,
+    })
+  );
+});
 
 wsServer.on("connection", async (ws) => {
-  var parser = new ReadlineParser();
-  serialPort.pipe(parser);
-  parser.on("data", function (data) {
-    console.log("data from serial: " + data);
-    if (data.includes("ttyS0")) {
-      serialPort.write("\n");
-    }
-    ws.send(
-      JSON.stringify({
-        messageType: "terminal-message",
-        text: data,
-      })
-    );
-  });
-
   ws.on("message", (message) => {
     message = JSON.parse(message.toString());
     if (message.messageType === "websocket-initialization-message") {
@@ -39,7 +61,15 @@ wsServer.on("connection", async (ws) => {
       ws.userId = userId;
     } else if (message.messageType === "terminal-message") {
       console.log("Message received from frontend terminal: " + JSON.stringify(message.body));
-      serialPort.write(message.body + "\n");
+      var computerId = ws.computerId;
+      if (computerId == 1) {
+        serialPort.write(message.body + "\n");
+      } else if (computerId == 2) {
+        serialPort2.write(message.body + "\n");
+      } else {
+        1
+        console.log("Computer IDs 1 and 2 are the ony supported serial ports");
+      }
     }
   });
 

@@ -20,7 +20,7 @@ function Terminal({ setPage, computerId, userId, isAdmin }) {
     ws.onopen = () => {
       ws.send(JSON.stringify({ messageType: "websocket-initialization-message", computerId: computerId, userId: userId }));
       printToTerminal("You are now in control of computerId=" + computerId);
-      XTermRef.current.terminal.write("$ ");
+      XTermRef.current.terminal.write("");
     };
 
     ws.onmessage = (messageFromBackend) => {
@@ -50,11 +50,11 @@ function Terminal({ setPage, computerId, userId, isAdmin }) {
 
   function printToTerminal(str) {
     if (XTermRef.current) {
-      if (afterInput) {
-        afterInput = false;
-        return 0;
-      }
-      XTermRef.current.terminal.write(str + "\r\n$ ");
+      // if (afterInput) {
+      //   afterInput = false;
+      //   return 0;
+      // }
+      XTermRef.current.terminal.write(str + "\r\n");
     }
   }
 
