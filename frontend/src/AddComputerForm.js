@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import "./AddComputerForm.css";
+import AddSwitch from "./AddSwitch.js";
 
 function AddComputerForm({ setPage, userId }) {
   const [list, setList] = useState([""]);
@@ -90,7 +91,7 @@ function AddComputerForm({ setPage, userId }) {
         <select id="template-select" value={switchId} onChange={(e) => setSwitchId(e.target.value)}>
             {list.map((list) => (
               <option key={list.switchId} value={list.switchId}>
-                {list.switchId} {list.ipAddress}
+                {list.switchId} IP Address: {list.ipAddress}
               </option>
             ))}
           </select>
@@ -99,6 +100,7 @@ function AddComputerForm({ setPage, userId }) {
           Add Computer
         </Button>
       </Form>
+      <AddSwitch />
       <div id="message_"></div>
     </div>
   );

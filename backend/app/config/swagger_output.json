@@ -745,9 +745,6 @@
             "schema": {
               "type": "object",
               "properties": {
-                "switchId": {
-                  "example": "any"
-                },
                 "ipAddress": {
                   "example": "any"
                 },
