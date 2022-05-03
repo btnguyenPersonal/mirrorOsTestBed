@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import './Dashboard.css'
 
 var qws;
 var wsIdDebug = "empty";
@@ -61,14 +62,14 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
       if (message.messageType === "initialize-websocket") {
         qws.id = message.wsId;
         wsIdDebug = message.wsId;       
-        loadData(); //Refresh the page, why not.
+        loadData();
       } else if (message.messageType === "granted-computer") {
         obtainComputer(message.computerId);
-        loadData(); //Refresh the page, why not.
+        loadData();
       } else if (message.messageType === "message-to-display") {
         document.getElementById("message_box").innerHTML =
           "<p><small>" + message.body + "</small></p>";
-        loadData(); //Refresh the page, why not.
+        loadData();
       } else if (message.messageType === "queue-data") {
         setQueue(message.queue);
         setComputersInUse(message.computersInUse);
@@ -198,21 +199,16 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
 
   let content = (
     <nav>
-      <div
-        className="Header"
-        style={{ display: "flex", justifyContent: "space-between" }}
-      >
         <button
+            className="refreshButton"
           onClick={() => {
             loadData();
             document.getElementById("message_box").innerHTML = "";
           }}
         >
-          Refresh Page
+          Refresh
         </button>
-        {isAdmin ? <div>Welcome admin</div> : <div>Welcome</div>}
-        <div>OS Pi Testbed</div>
-      </div>
+        <div className="welcomeText">{isAdmin ? `Welcome Admin` : `Welcome` }</div>
       <div id="message_box"></div>
       {loaded ? (
         <ul>
@@ -220,6 +216,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
             <li key={item.computerId}>
               {isAdmin && (
                 <button
+                    className="defaultButton"
                   style={{ backgroundColor: `#E68E8E` }}
                   onClick={() => {
                     if(!item.inUse) {
@@ -259,6 +256,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
               {queue ? (
                 !isInQueue(item.computerId) ? (
                   <button
+                    className="defaultButton"
                     style={{ backgroundColor: `#8EE690` }}
                     onClick={() => joinQueue(item.computerId)}
                   >
@@ -266,6 +264,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
                   </button>
                 ) : (
                   <button
+                    className="defaultButton"
                     style={{ backgroundColor: `#E68E8E` }}
                     onClick={() => exitQueue(item.computerId)}
                   >
@@ -279,16 +278,19 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
                 <div>
                   <br/>
                 <button
+                    className="defaultButton"
                   style={{ backgroundColor: `#7EC8E3` }}
                   onClick={() => kickUserOffComputer(item.computerId)}>
                   KICK USER OFF COMPUTER
                 </button> <div></div>
                 <button
+                    className="defaultButton"
                   style={{ backgroundColor: `#7EC8E3` }}
                   onClick={() => joinFrontOfQueue(item.computerId)}>
                   JOIN FRONT OF QUEUE
                 </button>
                 <button
+                    className="defaultButton"
                   style={{ backgroundColor: `#7EC8E3` }}
                   onClick={() => clearQueue(item.computerId)}>
                   CLEAR QUEUE
@@ -302,26 +304,26 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
       ) : (
         <p>Loading...</p>
       )}
-      <button onClick={() => joinQueue("all")}>JOIN ALL QUEUES </button>
-      <button onClick={() => exitQueue("all")}>EXIT ALL QUEUES </button>
+      <button className="defaultButton" onClick={() => joinQueue("all")}>JOIN ALL QUEUES </button>
+      <button className="defaultButton" onClick={() => exitQueue("all")}>EXIT ALL QUEUES </button>
       {isAdmin ? (
         <div>       
           <div>
           </div>
           <b/>
-          <button onClick={() => setPage("ChangePasswordForm")}>
+          <button 
+          className="defaultButton"
+          onClick={() => setPage("ChangePasswordForm")}>
             Go to Change Password
           </button>
-          <button onClick={() => setPage("AddComputerForm")}>
+          <button 
+          className="defaultButton"
+          onClick={() => setPage("AddComputerForm")}>
             Go to Add Computer
           </button>
         </div>
       ) : ""}
       <br/>
-      <div id="debugthing"> <b>STUFF FOR DEBUGGING:</b></div>
-      <div id="queue-state"> QUEUE STATE: {JSON.stringify(queue)}</div>
-      <div id="user"> USER ID: {userId}</div>
-      <div id="wsId"> WS ID: {wsIdDebug}</div>
     </nav>
   );
 

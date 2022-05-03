@@ -19,6 +19,8 @@ function Login({ setPage, setUserId, setIsAdmin}) {
   function sendCredentials(email,password)
   {
     const login = { email, password};
+      console.log(email);
+      console.log(password);
     fetch(`http://${process.env.REACT_APP_IP}:8080/api/login`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -44,29 +46,29 @@ function Login({ setPage, setUserId, setIsAdmin}) {
     <div className="Login">
       <h1>OS Test Bed</h1>
       <Form onSubmit={handleSubmit}>
-        <Form.Label className="input_field_label">Email: </Form.Label>
         <Form.Group size="lg" controlId="email">
           <Form.Control
             autoFocus
             className="input_field"
+            placeholder="Netid@iastate.edu"
             pattern=".+@iastate\.edu"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </Form.Group>
-        <Form.Label className="input_field_label">Password: </Form.Label>
         <Form.Group size="lg" controlId="password">
           <Form.Control
             className="input_field"
+            placeholder="Password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </Form.Group>
-        <Button size="lg" type="submit" disabled={!validateForm()}>
+        <button className="defaultButton" size="lg" type="submit" disabled={!validateForm()}>
           Login
-        </Button>
+        </button>
       </Form>
       <div id="fail_message"></div>
     </div>
