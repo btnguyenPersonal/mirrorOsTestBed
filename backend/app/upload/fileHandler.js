@@ -24,19 +24,19 @@ exports.uploader = async (req, res, next) => {
 	});
 	
 	//filters out wrong file types
-	const fileFilter = (req, file, cb) => {
-		if(file.mimetype === 'application/octet-stream')
-			cb(null, true);
-		else
-			cb(new Error('Unsupported file type'), false);
-	};
+	//const fileFilter = (req, file, cb) => {
+	//	if(file.mimetype === 'application/octet-stream')
+	//		cb(null, true);
+	//	else
+	//		cb(new Error('Unsupported file type'), false);
+	//};
 	
 	var upload = multer({
 		storage: storage, 
 		limits: {
 			fileSize: 30 * 1024 * 1024
-			},
-		fileFilter: fileFilter
+			}//,
+		//fileFilter: fileFilter
 	}).single('imgFile');
 	
 	upload (req, res, (err) => {

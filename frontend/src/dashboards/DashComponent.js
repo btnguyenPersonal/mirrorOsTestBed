@@ -192,8 +192,8 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
     var hours = Math.floor(durationMs/(1000*60*60));
     var minutes = (durationMs/(1000*60)).toFixed(0);
     //actually needs to not use !=
-    return (hours != 0 ? hours + "h " : "") +
-      (minutes != 0 ? minutes + "m " : "<1m")
+    return (hours > 0 ? hours + "h " : "") +
+      (minutes > 0 ? minutes + "m " : "<1m")
   }
 
   let content = (

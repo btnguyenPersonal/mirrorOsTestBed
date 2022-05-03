@@ -8,7 +8,7 @@ const swaggerFile = require("./app/config/swagger_output.json");
 
 const app = express();
 var corsOptions = {
-  origin: `http://${process.env.IP}:3000`,
+  origin: [`http://${process.env.IP}:3000`, `http://localhost:3000`],
 };
 
 const db = require("./app");
@@ -16,6 +16,7 @@ const db = require("./app");
 initializeDb();
 
 app.use(cors(corsOptions));
+//app.use(cors({origin: `localhost`}));
 // parse requests of content-type - application/json
 app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
@@ -128,19 +129,22 @@ async function initializeDb() {
           //Computer stuff. inUse is false by default.
           await Computer.create({
             portId: 2,
+            switchId: 1,
             serialNumber: "e2f2ecf5",
             model: "Raspberry Pi 3 Model B+",
           });
           await Computer.create({
             portId: 3,
+            switchId: 1,
             serialNumber: "e2f2ecf5",
             model: "Raspberry Pi 3 Model B+",
           });
-          await Computer.create({
-            portId: 4,
-            serialNumber: "e2f2ecf5",
-            model: "Raspberry Pi 3 Model B+",
-          });
+          // await Computer.create({
+          //   portId: 4,
+          //   switchId: 1,
+          //   serialNumber: "e2f2ecf5",
+          //   model: "Raspberry Pi 3 Model B+",
+          // });
           // await Computer.create({
           //   portId: 5,
           //   serialNumber: 'e2f2ecf5',
