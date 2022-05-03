@@ -26,6 +26,7 @@ function Login({ setPage, setUserId, setIsAdmin}) {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(login)
     }).then(async (response) => {
+      console.log(response.status);
       if (response.status === 200) {
         let json = await response.json();
         setUserId(json.user.userId);

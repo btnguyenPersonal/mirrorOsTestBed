@@ -23,7 +23,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
     loadData();
     const interval = setInterval(() => {
       loadData();
-    }, 10000);
+    }, 100000);
     return () => clearInterval(interval);
   }, []);
 
@@ -229,12 +229,13 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
                 </button>
               )}
               {isAdmin && <br />}
-              Computer ID: {item.computerId} | Computer Type: {item.model}
-              {queue
-                ? ` | Users in Queue: ${JSON.stringify(
+              <p className="defaultText">{item.model}</p> <br />
+              <p className="defaultText">{queue
+                ? `Users waiting: ${JSON.stringify(
                     queue[item.computerId].queue.length
                   )}`
                 : ""}
+              </p>
               {queue && isInQueue(item.computerId)
                 ? getPositionStr(item.computerId)
                 : ""}
