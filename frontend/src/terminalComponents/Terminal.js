@@ -85,8 +85,8 @@ function Terminal({ setPage, computerId, userId, isAdmin }) {
   let content = (
     <div>
       <XTerm ref={XTermRef} options={XTermOpt} onKey={onKey} />
-      <button onClick={() => ws.close()}>Close terminal</button>
-      <button onClick={() => clearTerminal()}>Clear terminal</button>
+      <button className="termButton" onClick={() => ws.close()}>Close terminal</button>
+      <button className="termButton" onClick={() => clearTerminal()}>Clear terminal</button>
     </div>
   );
 

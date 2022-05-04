@@ -37,20 +37,17 @@ function TerminalPage({ setPage, computerId, userId, isAdmin }) {
 
   const Upload = () => {
     return (
-      <div>
+      <div className="chooseFile">
+      <h1>Upload a file!</h1>
         <input type="file" name="file" onChange={changeHandler} />
-        {isFilePicked ? (
+          <button onClick={handleSubmission}>Submit</button>
+
+        {isFilePicked && (
           <div>
             <p>Filename: {selectedFile.name}</p>
             <p>Size in bytes: {(selectedFile.size / Math.pow(1000, 2)).toFixed(2)} mb</p>
             <p>lastModifiedDate: {selectedFile.lastModifiedDate.toLocaleDateString()}</p>
-          </div>
-        ) : (
-          <p>Select a file to show details</p>
-        )}
-        <div>
-          <button onClick={handleSubmission}>Submit</button>
-        </div>
+          </div>)}
         <div id="errorStatus"></div>
       </div>
     );
@@ -60,8 +57,9 @@ function TerminalPage({ setPage, computerId, userId, isAdmin }) {
     <div>
       {fileUploaded ? (
         <div>
-          <div id="fileStatus"></div> <br /> <button onClick={() => setFileUploaded(false)}>Submit new File</button>{" "}
+          <button className="termButton" onClick={() => setFileUploaded(false)}>Submit new File</button>{" "}
           <button
+            className="termButton"
             onClick={() =>
               fetch(`http://${process.env.REACT_APP_IP}:8080/api/reboot/${computerId}`, {
                 method: "POST",
@@ -76,7 +74,7 @@ function TerminalPage({ setPage, computerId, userId, isAdmin }) {
         <Upload />
       )}
 
-      <Terminal setPage={setPage} computerId={computerId} userId={userId} isAdmin={isAdmin}/>
+      <Terminal className="terminal" setPage={setPage} computerId={computerId} userId={userId} isAdmin={isAdmin}/>
     </div>
   );
   return content;
