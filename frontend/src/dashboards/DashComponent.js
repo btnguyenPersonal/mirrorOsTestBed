@@ -183,7 +183,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
   function getSessionInfo(computerId) {
     if(!computersInUse) return "";
     if(!computersInUse[computerId]) return "";
-    return "Session Duration: " + getSessionDuration(computerId) + " | Active User: " + computersInUse[computerId].user.email
+    return "Session: " + computersInUse[computerId].user.email + ", " + getSessionDuration(computerId)
   }
 
   function getSessionDuration(computerId) {
@@ -245,7 +245,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
                 </div>
               )}
 
-              {item.inUse && !isInQueue(item.computerId) && (<h2 className="defaultText">{queue
+              {item.inUse && (<h2 className="defaultText">{queue
                 ? `Users waiting: ${JSON.stringify(
                     queue[item.computerId].queue.length
                   )}`
