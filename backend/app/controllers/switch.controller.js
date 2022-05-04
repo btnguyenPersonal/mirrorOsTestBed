@@ -5,7 +5,6 @@ exports.create = (req, res) => {
   // #swagger.tags = ['switch']
   if (
     !utils.isBodyValid(req, res, {
-      switchId: "integer",
       ipAddress: "string",
       username: "string",
       password: "string",
@@ -14,7 +13,6 @@ exports.create = (req, res) => {
     return;
   }
   const switchEntry = {
-    switchId: req.body.switchId,
     ipAddress: req.body.ipAddress,
     username: req.body.username,
     password: req.body.password,
