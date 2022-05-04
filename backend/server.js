@@ -114,7 +114,6 @@ async function initializeDb() {
           });
           //Switch stuff?
           await Switch.create({ ipAddress: "192.168.1.140", username: "ostestbed", password: "05testbed!" });
-          await Switch.create({ ipAddress: "193.168.1.140", username: "ostestbed", password: "05testbed!" });
           //Password stuff.
           hashedPassword = await bcrypt.hash("p", 10);
           await Password.create({
