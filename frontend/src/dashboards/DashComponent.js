@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import './Dashboard.css'
 
 var qws;
 var wsIdDebug = "empty";
@@ -22,7 +23,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
     loadData();
     const interval = setInterval(() => {
       loadData();
-    }, 10000);
+    }, 100000);
     return () => clearInterval(interval);
   }, []);
 
@@ -61,14 +62,14 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
       if (message.messageType === "initialize-websocket") {
         qws.id = message.wsId;
         wsIdDebug = message.wsId;       
-        loadData(); //Refresh the page, why not.
+        loadData();
       } else if (message.messageType === "granted-computer") {
         obtainComputer(message.computerId);
-        loadData(); //Refresh the page, why not.
+        loadData();
       } else if (message.messageType === "message-to-display") {
         document.getElementById("message_box").innerHTML =
           "<p><small>" + message.body + "</small></p>";
-        loadData(); //Refresh the page, why not.
+        loadData();
       } else if (message.messageType === "queue-data") {
         setQueue(message.queue);
         setComputersInUse(message.computersInUse);
@@ -100,7 +101,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
     if (isInQueue(computerId)) {
       var thePosition = queue[computerId].queue.indexOf(userId);
       return (
-        " | Position in queue: " +
+        "Position: " +
         thePosition +
         " " +
         (thePosition === 0 ? "(You are next!)" : "")
@@ -182,7 +183,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
   function getSessionInfo(computerId) {
     if(!computersInUse) return "";
     if(!computersInUse[computerId]) return "";
-    return "Session Duration: " + getSessionDuration(computerId) + " | Active User: " + computersInUse[computerId].user.email
+    return "Session: " + computersInUse[computerId].user.email + ", " + getSessionDuration(computerId)
   }
 
   function getSessionDuration(computerId) {
@@ -198,29 +199,87 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
 
   let content = (
     <nav>
-      <div
-        className="Header"
-        style={{ display: "flex", justifyContent: "space-between" }}
-      >
         <button
+            className="refreshButton"
           onClick={() => {
             loadData();
             document.getElementById("message_box").innerHTML = "";
           }}
         >
-          Refresh Page
+          ↺
         </button>
-        {isAdmin ? <div>Welcome admin</div> : <div>Welcome</div>}
-        <div>OS Pi Testbed</div>
-      </div>
+      <button className="dashButton" onClick={() => joinQueue("all")}>JOIN ALL QUEUES </button>
+      <button className="dashButton" onClick={() => exitQueue("all")}>EXIT ALL QUEUES </button>
+      {isAdmin ? (
+        <div>       
+          <div>
+          </div>
+          <b/>
+          <button 
+          className="dashButton"
+          onClick={() => setPage("ChangePasswordForm")}>
+            CHANGE PASSWORD
+          </button>
+          <button 
+          className="dashButton"
+          onClick={() => setPage("AddComputerForm")}>
+            ADD COMPUTER
+          </button>
+        </div>
+      ) : ""}
       <div id="message_box"></div>
       {loaded ? (
         <ul>
           {list.map((item) => (
             <li key={item.computerId}>
+              <div className="row">
+              <div className="column">
+              <h2 className="defaultText">{item.model}</h2>
+              {!item.inUse ? (
+                <div style={{ color: `#33CC33` }}>
+                  <h1>AVAILABLE</h1>
+                </div>
+              ) : (
+                <div style={{ color: `#ff0000` }}>
+                  <h1>IN USE</h1>
+                </div>
+              )}
+
+              {item.inUse && (<h2 className="defaultText">{queue
+                ? `Users waiting: ${JSON.stringify(
+                    queue[item.computerId].queue.length
+                  )}`
+                : ""}
+              </h2>)}
+              {queue && isInQueue(item.computerId)
+                && <h3>{getPositionStr(item.computerId)}</h3>}
+              {isAdmin && (
+                <div>
+                  {getSessionInfo(item.computerId)}
+                </div>
+              )}
+              </div>
+              <div className="column">
+              {queue && (
+                !isInQueue(item.computerId) ? (
+                  <button
+                    className="dashButton"
+                    onClick={() => joinQueue(item.computerId)}
+                  >
+                    JOIN
+                  </button>
+                ) : (
+                  <button
+                    className="redDashButton"
+                    onClick={() => exitQueue(item.computerId)}
+                  >
+                    EXIT
+                  </button>
+                )
+              )}
               {isAdmin && (
                 <button
-                  style={{ backgroundColor: `#E68E8E` }}
+                    className="redDashButton"
                   onClick={() => {
                     if(!item.inUse) {
                       deleteComputer(item.computerId)
@@ -228,100 +287,38 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
                       document.getElementById("message_box").innerHTML = "You cannot delete a computer that is in use.";
                     }}}
                 >
-                  Delete Computer
+                  DELETE
                 </button>
               )}
-              {isAdmin && <br />}
-              Computer ID: {item.computerId} | Computer Type: {item.model}
-              {queue
-                ? ` | Users in Queue: ${JSON.stringify(
-                    queue[item.computerId].queue.length
-                  )}`
-                : ""}
-              {queue && isInQueue(item.computerId)
-                ? getPositionStr(item.computerId)
-                : ""}
-              {!item.inUse ? (
-                <div style={{ color: `#33CC33` }}>
-                  <b>AVAILABLE</b>
-                </div>
-              ) : (
-                <div style={{ color: `#FF0000` }}>
-                  <b>IN USE</b>
-                </div>
-              )}
-              {isAdmin ? (
-                <div>
-                  {getSessionInfo(item.computerId)}
-                </div>
-              ) : ""}
-              <br/>
-              {queue ? (
-                !isInQueue(item.computerId) ? (
-                  <button
-                    style={{ backgroundColor: `#8EE690` }}
-                    onClick={() => joinQueue(item.computerId)}
-                  >
-                    JOIN QUEUE
-                  </button>
-                ) : (
-                  <button
-                    style={{ backgroundColor: `#E68E8E` }}
-                    onClick={() => exitQueue(item.computerId)}
-                  >
-                    EXIT QUEUE
-                  </button>
-                )
-              ) : (
-                ""
-              )}
-              {isAdmin ? (
-                <div>
-                  <br/>
+              {isAdmin && (
+                  <>
                 <button
-                  style={{ backgroundColor: `#7EC8E3` }}
+                    className="redDashButton"
                   onClick={() => kickUserOffComputer(item.computerId)}>
-                  KICK USER OFF COMPUTER
+                  KICK
                 </button> <div></div>
                 <button
-                  style={{ backgroundColor: `#7EC8E3` }}
+                    className="redDashButton"
                   onClick={() => joinFrontOfQueue(item.computerId)}>
-                  JOIN FRONT OF QUEUE
+                  JOIN FRONT
                 </button>
                 <button
-                  style={{ backgroundColor: `#7EC8E3` }}
+                    className="redDashButton"
                   onClick={() => clearQueue(item.computerId)}>
-                  CLEAR QUEUE
+                  CLEAR
                 </button>
-              </div>
-                ) : ""
+                  </>
+                )
               } 
+              </div>
+              </div>
             </li>
           ))}
         </ul>
       ) : (
         <p>Loading...</p>
       )}
-      <button onClick={() => joinQueue("all")}>JOIN ALL QUEUES </button>
-      <button onClick={() => exitQueue("all")}>EXIT ALL QUEUES </button>
-      {isAdmin ? (
-        <div>       
-          <div>
-          </div>
-          <b/>
-          <button onClick={() => setPage("ChangePasswordForm")}>
-            Go to Change Password
-          </button>
-          <button onClick={() => setPage("AddComputerForm")}>
-            Go to Add Computer
-          </button>
-        </div>
-      ) : ""}
       <br/>
-      <div id="debugthing"> <b>STUFF FOR DEBUGGING:</b></div>
-      <div id="queue-state"> QUEUE STATE: {JSON.stringify(queue)}</div>
-      <div id="user"> USER ID: {userId}</div>
-      <div id="wsId"> WS ID: {wsIdDebug}</div>
     </nav>
   );
 

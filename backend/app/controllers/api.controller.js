@@ -46,12 +46,11 @@ exports.reboot = async (req, res) => {
   const password = switchDetails.password;
 
   //Execute the reboot script passing in the port ID to reboot.
-  let command = ` ./reboot.sh ${ipAddress} ${username} ${password} ${portId}`;
-  if (process.env.OS.includes("Windows")) {
-    command = "cd"; //Windows can't run our command without Windows Subsystem for Linux (WSL) and I can't install it lol.
-  }
-  return await exec(command)
+  let command = "cd /home/ben/git/ostestbed/backend;./reboot.sh " + ipAddress + " " + username + " " + password + " " + portId;
+  console.log(command);
+  await exec(command)
     .then((r) => {
+      console.log("executed: " + command);
       if (!r.stderr) {
         res.status(200).send({
           message: "Command executed successfully.",
@@ -67,6 +66,7 @@ exports.reboot = async (req, res) => {
         message: err,
       });
     });
+  
 };
 
 exports.fileUpload = async (req, res) => {

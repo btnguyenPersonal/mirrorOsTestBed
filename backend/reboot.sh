@@ -4,7 +4,7 @@ set Username [lindex $argv 1]
 set Password [lindex $argv 2]
 set PortNo [lindex $argv 3]
 
-set timeout 10
+set timeout 100
 
 spawn ssh -o KexAlgorithms=+diffie-hellman-group1-sha1 -o HostKeyAlgorithms=ssh-dss $Username@$IPAddress
 expect "*: "

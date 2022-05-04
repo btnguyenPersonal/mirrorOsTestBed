@@ -95,6 +95,6 @@ function simulateComputersReceivingData() {
 //The following is to simulate data coming from serial stuff.
 setInterval(() => {
   //simulateComputersReceivingData();
-}, 10000);
+}, 100000);
 
 module.exports = [computerIdToWebsocketDict];
