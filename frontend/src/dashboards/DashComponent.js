@@ -101,7 +101,7 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
     if (isInQueue(computerId)) {
       var thePosition = queue[computerId].queue.indexOf(userId);
       return (
-        " | Position in queue: " +
+        "Position: " +
         thePosition +
         " " +
         (thePosition === 0 ? "(You are next!)" : "")
@@ -206,18 +206,80 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
             document.getElementById("message_box").innerHTML = "";
           }}
         >
-          Refresh
+          ↺
         </button>
-        <div className="welcomeText">{isAdmin ? `Welcome Admin` : `Welcome` }</div>
+      <button className="dashButton" onClick={() => joinQueue("all")}>JOIN ALL QUEUES </button>
+      <button className="dashButton" onClick={() => exitQueue("all")}>EXIT ALL QUEUES </button>
+      {isAdmin ? (
+        <div>       
+          <div>
+          </div>
+          <b/>
+          <button 
+          className="dashButton"
+          onClick={() => setPage("ChangePasswordForm")}>
+            CHANGE PASSWORD
+          </button>
+          <button 
+          className="dashButton"
+          onClick={() => setPage("AddComputerForm")}>
+            ADD COMPUTER
+          </button>
+        </div>
+      ) : ""}
       <div id="message_box"></div>
       {loaded ? (
         <ul>
           {list.map((item) => (
             <li key={item.computerId}>
+              <div className="row">
+              <div className="column">
+              <h2 className="defaultText">{item.model}</h2>
+              {!item.inUse ? (
+                <div style={{ color: `#33CC33` }}>
+                  <h1>AVAILABLE</h1>
+                </div>
+              ) : (
+                <div style={{ color: `#ff0000` }}>
+                  <h1>IN USE</h1>
+                </div>
+              )}
+
+              {item.inUse && !isInQueue(item.computerId) && (<h2 className="defaultText">{queue
+                ? `Users waiting: ${JSON.stringify(
+                    queue[item.computerId].queue.length
+                  )}`
+                : ""}
+              </h2>)}
+              {queue && isInQueue(item.computerId)
+                && <h3>{getPositionStr(item.computerId)}</h3>}
+              {isAdmin && (
+                <div>
+                  {getSessionInfo(item.computerId)}
+                </div>
+              )}
+              </div>
+              <div className="column">
+              {queue && (
+                !isInQueue(item.computerId) ? (
+                  <button
+                    className="dashButton"
+                    onClick={() => joinQueue(item.computerId)}
+                  >
+                    JOIN
+                  </button>
+                ) : (
+                  <button
+                    className="redDashButton"
+                    onClick={() => exitQueue(item.computerId)}
+                  >
+                    EXIT
+                  </button>
+                )
+              )}
               {isAdmin && (
                 <button
-                    className="defaultButton"
-                  style={{ backgroundColor: `#E68E8E` }}
+                    className="redDashButton"
                   onClick={() => {
                     if(!item.inUse) {
                       deleteComputer(item.computerId)
@@ -225,105 +287,37 @@ function DashComponent({ setPage, setComputerId, userId, isAdmin }) {
                       document.getElementById("message_box").innerHTML = "You cannot delete a computer that is in use.";
                     }}}
                 >
-                  Delete Computer
+                  DELETE
                 </button>
               )}
-              {isAdmin && <br />}
-              <p className="defaultText">{item.model}</p> <br />
-              <p className="defaultText">{queue
-                ? `Users waiting: ${JSON.stringify(
-                    queue[item.computerId].queue.length
-                  )}`
-                : ""}
-              </p>
-              {queue && isInQueue(item.computerId)
-                ? getPositionStr(item.computerId)
-                : ""}
-              {!item.inUse ? (
-                <div style={{ color: `#33CC33` }}>
-                  <b>AVAILABLE</b>
-                </div>
-              ) : (
-                <div style={{ color: `#FF0000` }}>
-                  <b>IN USE</b>
-                </div>
-              )}
-              {isAdmin ? (
-                <div>
-                  {getSessionInfo(item.computerId)}
-                </div>
-              ) : ""}
-              <br/>
-              {queue ? (
-                !isInQueue(item.computerId) ? (
-                  <button
-                    className="defaultButton"
-                    style={{ backgroundColor: `#8EE690` }}
-                    onClick={() => joinQueue(item.computerId)}
-                  >
-                    JOIN QUEUE
-                  </button>
-                ) : (
-                  <button
-                    className="defaultButton"
-                    style={{ backgroundColor: `#E68E8E` }}
-                    onClick={() => exitQueue(item.computerId)}
-                  >
-                    EXIT QUEUE
-                  </button>
-                )
-              ) : (
-                ""
-              )}
-              {isAdmin ? (
-                <div>
-                  <br/>
+              {isAdmin && (
+                  <>
                 <button
-                    className="defaultButton"
-                  style={{ backgroundColor: `#7EC8E3` }}
+                    className="redDashButton"
                   onClick={() => kickUserOffComputer(item.computerId)}>
-                  KICK USER OFF COMPUTER
+                  KICK
                 </button> <div></div>
                 <button
-                    className="defaultButton"
-                  style={{ backgroundColor: `#7EC8E3` }}
+                    className="redDashButton"
                   onClick={() => joinFrontOfQueue(item.computerId)}>
-                  JOIN FRONT OF QUEUE
+                  JOIN FRONT
                 </button>
                 <button
-                    className="defaultButton"
-                  style={{ backgroundColor: `#7EC8E3` }}
+                    className="redDashButton"
                   onClick={() => clearQueue(item.computerId)}>
-                  CLEAR QUEUE
+                  CLEAR
                 </button>
-              </div>
-                ) : ""
+                  </>
+                )
               } 
+              </div>
+              </div>
             </li>
           ))}
         </ul>
       ) : (
         <p>Loading...</p>
       )}
-      <button className="defaultButton" onClick={() => joinQueue("all")}>JOIN ALL QUEUES </button>
-      <button className="defaultButton" onClick={() => exitQueue("all")}>EXIT ALL QUEUES </button>
-      {isAdmin ? (
-        <div>       
-          <div>
-          </div>
-          <b/>
-          <button 
-          className="defaultButton"
-          onClick={() => setPage("ChangePasswordForm")}>
-            Go to Change Password
-          </button>
-          <button 
-          className="defaultButton"
-          onClick={() => setPage("AddComputerForm")}>
-            Go to Add Computer
-          </button>
-        </div>
-      ) : ""}
       <br/>
     </nav>
   );
